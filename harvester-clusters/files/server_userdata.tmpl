@@ -1,0 +1,63 @@
+#cloud-config
+%{ if length(ssh_keys) > 0 }
+ssh_authorized_keys:
+%{ for ssh_key in ssh_keys }
+- ${ssh_key}
+%{ endfor }
+%{ endif }
+write_files:
+- path: /usr/local/bin/k3svalidation.sh
+  permissions: '0700'
+  content: |
+    #!/bin/bash
+    cluster_name=$${1:-1}
+    declare -i i; i=0
+    until k3d kubeconfig get $${cluster_name} > /home/ubuntu/.k3d/kubeconfig-$${cluster_name}.yml
+    do
+      if (( i > 20 )); then
+        break
+      fi
+
+      sleep 2
+      i+=1
+    done
+runcmd:
+- echo "net.ipv4.ip_local_port_range = 15000 61000" >> /etc/sysctl.conf
+- echo "fs.file-max = 12000500" >> /etc/sysctl.conf
+- echo "fs.nr_open = 20000500" >> /etc/sysctl.conf
+- echo "net.ipv4.tcp_mem = 10000000 10000000 10000000" >> /etc/sysctl.conf
+- sysctl -w net.core.rmem_max=8388608
+- sysctl -w net.core.wmem_max=8388608
+- sysctl -w net.core.rmem_default=65536
+- sysctl -w net.core.wmem_default=65536
+- sysctl -w net.ipv4.tcp_rmem='4096 87380 8388608'
+- sysctl -w net.ipv4.tcp_wmem='4096 65536 8388608'
+- sysctl -w net.ipv4.tcp_mem='8388608 8388608 8388608'
+- sysctl -w net.ipv4.route.flush=1
+- ulimit -n 20000000
+- echo "# <domain> <type> <item>  <value>" >> /etc/security/limits.d/limits.conf
+- echo "    *       soft  nofile  20000000" >> /etc/security/limits.d/limits.conf
+- echo "    *       hard  nofile  20000000" >> /etc/security/limits.d/limits.conf
+- sysctl -p
+- apt-get update
+- apt-get install -y vim software-properties-common resolvconf linux-headers-$(uname -r)
+- echo "nameserver 1.1.1.1" > /etc/resolvconf/resolv.conf.d/tail
+- systemctl start resolvconf
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+- add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+- apt-get update
+- apt-get -y install docker-ce
+# - DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+# k3d v4.4.5 uses k3s v1.21.1+k3s1 by default to avoid https://k3d.io/faq/faq/#solved-nodes-fail-to-start-or-get-stuck-in-notready-state-with-log-nf_conntrack_max-permission-denied
+- wget https://github.com/rancher/k3d/releases/download/${k3d_version}/k3d-linux-amd64 -O /usr/local/bin/k3d
+- chmod +x /usr/local/bin/k3d
+- curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+- chmod +x ./kubectl
+- mv ./kubectl /usr/local/bin/kubectl
+- sleep 5
+- mkdir -p /home/ubuntu/.k3d/
+%{ for cluster_instance in range(cluster_count) ~}
+- k3d cluster create "k3s-cluster-${cluster_instance}" --api-port "${cluster_instance + 30000}" --image "rancher/k3s:${install_k3s_image}"
+- k3svalidation.sh k3s-cluster-${cluster_instance}
+- ${registration_commands[cluster_instance]} --kubeconfig "/home/ubuntu/.k3d/kubeconfig-k3s-cluster-${cluster_instance}.yml"
+%{ endfor ~}
