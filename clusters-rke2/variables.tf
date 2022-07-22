@@ -10,22 +10,49 @@ variable "existing_cloud_cred" {
   description = "(Optional) Name of an existing cloud credential to use. Only use this if create_credential is false."
 }
 
-variable "cluster_name" {
+variable "name_suffix" {
   type        = string
-  default     = "rke2"
-  description = "Unique identifier appended to the Rancher url subdomain"
+  default     = ""
+  description = "(Optional) suffix to append to your cloud credential, node template and node pool names"
 }
 
-variable "nodes_per_pool" {
-  type        = number
-  default     = 1
-  description = "Number of nodes to create per node pool"
+variable "cluster_name" {
+  type        = string
+  default     = ""
+  description = "(Optional) Desired cluster name, if not set then one will be generated"
+}
+
+variable "cluster_labels" {
+  type        = map(any)
+  default     = {}
+  description = "(Optional) Labels to add to each provisioned cluster"
 }
 
 variable "roles_per_pool" {
-  type        = list(string)
-  default     = ["control-plane,worker,etcd"]
-  description = "A list of strings where each element defines the roles for a given node pool via a comma-delimited string. ex: [\"control-plane,worker,etcd\", \"control-plane,worker\", \"etcd\", \"etcd\"]"
+  type        = list(map(string))
+  description = <<EOF
+  A list of maps where each element contains keys that define the roles and quantity for a given node pool.
+  Example: [
+    {
+      "quantity" = 3
+      "etd" = true
+      "control-plane" = true
+      "worker" = true
+    }
+  ]
+  EOF
+  validation {
+    condition     = contains([1, 3, 5], sum([for i, pool in var.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["etcd"] == "true", false)]))
+    error_message = "The number of etcd nodes per cluster must be one of [1, 3, 5]."
+  }
+  validation {
+    condition     = sum([for i, pool in var.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["control-plane"] == "true", false)]) >= 1
+    error_message = "The number of control-plane nodes per cluster must be >= 1."
+  }
+  validation {
+    condition     = sum([for i, pool in var.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["worker"] == "true", false)]) >= 1
+    error_message = "The number of worker nodes per cluster must be >= 1."
+  }
 }
 
 variable "aws_region" {
@@ -89,13 +116,7 @@ variable "insecure_flag" {
   description = "Flag used to determine if Rancher is using self-signed invalid certs (using a private CA)"
 }
 
-variable "cluster_labels" {
-  type        = map(any)
-  default     = {}
-  description = "Labels to add to each provisioned cluster"
-}
-
-variable "rke2_version" {
+variable "k8s_version" {
   type        = string
   default     = "v1.21.10+rke2r2"
   description = "Version of rke2 to use for downstream cluster"

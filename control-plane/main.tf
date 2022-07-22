@@ -123,6 +123,7 @@ module "rke1" {
   source = "./modules/rke1"
 
   cluster_name              = "local"
+  cloud_provider_name       = "aws"
   hostname_override_prefix  = local.name
   ssh_key_path              = var.ssh_key_path
   install_k8s_version       = var.install_k8s_version

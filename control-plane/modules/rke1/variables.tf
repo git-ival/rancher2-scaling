@@ -1,7 +1,29 @@
 variable "cluster_name" {
   type        = string
   default     = "local"
-  description = "Name of the cluster within Rancher2"
+  description = "Name of the cluster"
+}
+
+variable "user" {
+  type = string
+  default = "ubuntu"
+  description = "Name of the user to SSH as"
+}
+
+variable "cloud_provider_name" {
+  type = string
+  nullable = false
+  description = "A string designating the desired cloud provider's name. https://registry.terraform.io/providers/rancher/rke/latest/docs/resources/cluster#name"
+  validation {
+    condition = length(var.cloud_provider_name) > 0
+    error_message = "The cloud provider name must be of length > 0."
+  }
+}
+
+variable "cloud_provider_config" {
+  type = map(any)
+  default = null
+  description = "A map containing the values for a custom cloud provider configuration. https://registry.terraform.io/providers/rancher/rke/latest/docs/resources/cluster#cloud_provider"
 }
 
 variable "hostname_override_prefix" {
