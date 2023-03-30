@@ -21,3 +21,4 @@ kube-config.yaml
 *infracost*
 *pre-commit*
 *.tfrc
+*.rkestate
