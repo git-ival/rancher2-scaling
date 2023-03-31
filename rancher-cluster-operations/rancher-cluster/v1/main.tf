@@ -191,7 +191,7 @@ output "id" {
 }
 
 output "name" {
-  value = var.name
+  value = rancher2_cluster.this.name
 }
 
 output "default_project_id" {

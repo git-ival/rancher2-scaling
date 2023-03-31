@@ -3,8 +3,8 @@
 script_dir=$(dirname "$0")
 
 RANCHER_KUBE_CONFIG=${1} #
-BATCH_NUM_DEPLOYMENTS=${2:-5}
-TARGET_NUM_DEPLOYMENTS=${3:-150}
+BATCH_NUM_DEPLOYMENTS=${2:-10}
+TARGET_NUM_DEPLOYMENTS=${3:-100}
 namespace=${4}
 chart=${5}
 downstream_kube_config=${6}
@@ -46,26 +46,31 @@ function bulk_create_deployment() {
   ### $1 - number of deployments
   ### $2 - namespace to deploy to
   ### $3 - local chart dir or chart name to deploy
-  export KUBECONFIG="${downstream_kube_config}"
   for ((i = 0; i < $1; i++)); do
     helm install -n "${2}" --create-namespace --generate-name "${3}"
     # helm install -n "${2}" --create-namespace --generate-name "${3}" &>/dev/null
   done
 }
 
+function get_num_deployments() {
+  deployments=$(kubectl --kubeconfig "${1}" get deployments -n "${2}" -o custom-columns=NAME:.metadata.name | grep -iv NAME | grep "${3}" | wc -l)
+  echo -n "${deployments}"
+}
+
 function batch_scale() {
   counter=1
   NUM_BATCHES=$((TARGET_NUM_DEPLOYMENTS / (BATCH_NUM_DEPLOYMENTS)))
   HALF_COMPLETE=$(((NUM_BATCHES + 1) / 2)) # rounded up
-  while [ "${counter}" -le $NUM_BATCHES ]; do
+  while [ "${counter}" -le $TARGET_NUM_DEPLOYMENTS ]; do
     BATCH_SET_LIMIT=$((counter * BATCH_NUM_DEPLOYMENTS))
     echo "Creating ${BATCH_SET_LIMIT} deployments"
-    bulk_create_deployment ${BATCH_SET_LIMIT} "${namespace}" "${chart}"
+    export KUBECONFIG="${downstream_kube_config}"
+    bulk_create_deployment ${BATCH_NUM_DEPLOYMENTS} "${namespace}" "${chart}"
     retVal=$?
     if [[ $retVal -eq 1 ]]; then
       echo "Errored, skipping sleep"
     else
-      sleep 720
+      sleep 30
       if [[ "${counter}" -eq $HALF_COMPLETE ]]; then
         export KUBECONFIG="${RANCHER_KUBE_CONFIG}"
         get_heap_logs "$(((TARGET_NUM_DEPLOYMENTS + 1) / 2))"    # rounded up
@@ -85,11 +90,11 @@ batch_scale
 
 export KUBECONFIG="${RANCHER_KUBE_CONFIG}"
 
-clusters_reached=$(kubectl get clusters -A --no-headers | wc -l | xargs)
-get_heap_logs "${clusters_reached}"
-get_profile_logs "${clusters_reached}"
+deployments_reached=$(get_num_deployments "${downstream_kube_config}" "${namespace}" "mytest")
+get_heap_logs "${deployments_reached}"
+get_profile_logs "${deployments_reached}"
 
-echo "Reached: ${clusters_reached} downstream clusters"
+echo "Reached: ${deployments_reached} chart deployments"
 leader=$(get_leader_node)
 monitor=$(get_monitor_node)
 
@@ -109,4 +114,4 @@ echo "leader: $(get_leader_node)"
 echo "monitor: $(get_monitor_node)"
 
 # Get essentially as many rancher logs as will likely exist
-kubectl -n cattle-system logs -l status.phase=Running -l app=rancher -c rancher --timestamps --tail=99999999 >"rancher_logs-${clusters_reached}_clusters.txt"
+kubectl -n cattle-system logs -l status.phase=Running -l app=rancher -c rancher --timestamps --tail=99999999 >"rancher_logs-${deployments_reached}_deployments.txt"

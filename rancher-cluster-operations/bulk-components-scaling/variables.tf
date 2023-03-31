@@ -104,36 +104,36 @@ variable "k8s_version" {
 }
 
 variable "scale_secrets" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "scale_secretsv2" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "scale_tokens" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "scale_aws_cloud_creds" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "scale_linode_cloud_creds" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "scale_users" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "scale_projects" {
-  type = bool
+  type    = bool
   default = false
 }

@@ -42,11 +42,11 @@ variable "rancher_env_vars" {
   default     = []
   description = "A list of objects representing Rancher environment variables"
   validation {
-    condition     = length(var.rancher_env_vars) == 0 ? true : sum([for var in var.rancher_env_vars : 1 if length(lookup(var, "name", "")) > 0 ]) == length(var.rancher_env_vars)
+    condition     = length(var.rancher_env_vars) == 0 ? true : sum([for var in var.rancher_env_vars : 1 if length(lookup(var, "name", "")) > 0]) == length(var.rancher_env_vars)
     error_message = "Each env var object must contain key-value pairs for the \"name\" and \"value\" keys."
   }
   validation {
-    condition     = length(var.rancher_env_vars) == 0 ? true : sum([for var in var.rancher_env_vars : 1 if length(lookup(var, "value", "")) > 0 ]) == length(var.rancher_env_vars)
+    condition     = length(var.rancher_env_vars) == 0 ? true : sum([for var in var.rancher_env_vars : 1 if length(lookup(var, "value", "")) > 0]) == length(var.rancher_env_vars)
     error_message = "Each env var object must contain key-value pairs for the \"name\" and \"value\" keys."
   }
 }
@@ -59,11 +59,11 @@ variable "rancher_additional_values" {
   default     = []
   description = "A list of objects representing override values for the Rancher helm chart, see https://helm.sh/docs/chart_best_practices/values/#consider-how-users-will-use-your-values"
   validation {
-    condition     = length(var.rancher_additional_values) == 0 ? true : sum([for var in var.rancher_additional_values : 1 if length(lookup(var, "name", "")) > 0 ]) == length(var.rancher_additional_values)
+    condition     = length(var.rancher_additional_values) == 0 ? true : sum([for var in var.rancher_additional_values : 1 if length(lookup(var, "name", "")) > 0]) == length(var.rancher_additional_values)
     error_message = "Each env var object must contain key-value pairs for the \"name\" and \"value\" keys."
   }
   validation {
-    condition     = length(var.rancher_additional_values) == 0 ? true : sum([for var in var.rancher_additional_values : 1 if length(lookup(var, "value", "")) > 0 ]) == length(var.rancher_additional_values)
+    condition     = length(var.rancher_additional_values) == 0 ? true : sum([for var in var.rancher_additional_values : 1 if length(lookup(var, "value", "")) > 0]) == length(var.rancher_additional_values)
     error_message = "Each env var object must contain key-value pairs for the \"name\" and \"value\" keys."
   }
 }

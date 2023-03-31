@@ -91,7 +91,7 @@ module "aws_infra" {
   domain                 = local.domain
   r53_domain             = var.r53_domain
   s3_instance_profile    = var.s3_instance_profile
-  user_data_parts = [{
+  user_data_parts = length(var.byo_certs_bucket_path) > 0 || length(var.private_ca_file) > 0 ? [{
     filename     = "configure_tls_secret.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/files/values/configure_tls_secret.sh", {
@@ -104,7 +104,7 @@ module "aws_infra" {
       private_ca            = length(var.private_ca_file) > 0 ? true : false,
       private_ca_file       = var.private_ca_file,
     })
-  }]
+  }] : []
 }
 
 module "linode_infra" {
@@ -209,10 +209,10 @@ module "install_common" {
   rancher_password               = var.rancher_password
   use_new_bootstrap              = local.use_new_bootstrap
   rancher_node_count             = var.node_count
-  # rancher_env_vars               = var.rancher_env_vars
-  # rancher_additional_values      = var.rancher_additional_values
-  cattle_prometheus_metrics = var.cattle_prometheus_metrics
-  byo_certs_bucket_path     = var.byo_certs_bucket_path
+  rancher_env_vars               = var.rancher_env_vars
+  rancher_additional_values      = var.rancher_additional_values
+  cattle_prometheus_metrics      = var.cattle_prometheus_metrics
+  byo_certs_bucket_path          = var.byo_certs_bucket_path
 
   depends_on = [
     null_resource.rke,

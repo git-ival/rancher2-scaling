@@ -78,7 +78,7 @@ The port `8443` can be adjusted as need for your local system.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.54.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.60.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
 | <a name="provider_rancher2.admin"></a> [rancher2.admin](#provider\_rancher2.admin) | 1.25.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.4.3 |
@@ -152,16 +152,18 @@ The port `8443` can be adjusted as need for your local system.
 | <a name="input_monitoring_version"></a> [monitoring\_version](#input\_monitoring\_version) | Version of Monitoring v2 to install - Do not include the v prefix. | `string` | n/a | yes |
 | <a name="input_private_ca_file"></a> [private\_ca\_file](#input\_private\_ca\_file) | Optional: String that defines the name of the private CA .pem file in the specified S3 bucket's cert tarball | `string` | `""` | no |
 | <a name="input_r53_domain"></a> [r53\_domain](#input\_r53\_domain) | DNS domain for Route53 zone (defaults to domain if unset) | `string` | `""` | no |
+| <a name="input_rancher_additional_values"></a> [rancher\_additional\_values](#input\_rancher\_additional\_values) | A list of objects representing override values for the Rancher helm chart, see https://helm.sh/docs/chart_best_practices/values/#consider-how-users-will-use-your-values | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
 | <a name="input_rancher_chart"></a> [rancher\_chart](#input\_rancher\_chart) | Helm chart to use for Rancher install | `string` | `"stable"` | no |
 | <a name="input_rancher_charts_branch"></a> [rancher\_charts\_branch](#input\_rancher\_charts\_branch) | The github branch for the desired Rancher chart version | `string` | `"release-v2.6"` | no |
 | <a name="input_rancher_charts_repo"></a> [rancher\_charts\_repo](#input\_rancher\_charts\_repo) | The URL for the desired Rancher charts | `string` | `"https://git.rancher.io/charts"` | no |
-| <a name="input_rancher_env_vars"></a> [rancher\_env\_vars](#input\_rancher\_env\_vars) | A list of maps representing Rancher environment variables | `list(map(string))` | `[]` | no |
+| <a name="input_rancher_env_vars"></a> [rancher\_env\_vars](#input\_rancher\_env\_vars) | A list of objects representing Rancher environment variables | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
 | <a name="input_rancher_image"></a> [rancher\_image](#input\_rancher\_image) | n/a | `string` | `"rancher/rancher"` | no |
 | <a name="input_rancher_image_tag"></a> [rancher\_image\_tag](#input\_rancher\_image\_tag) | Rancher image tag to install, this can differ from rancher\_version which is the chart being used to install Rancher | `string` | `"master-head"` | no |
 | <a name="input_rancher_instance_type"></a> [rancher\_instance\_type](#input\_rancher\_instance\_type) | instance type used for the rancher servers | `string` | `"m5.xlarge"` | no |
 | <a name="input_rancher_loglevel"></a> [rancher\_loglevel](#input\_rancher\_loglevel) | A string specifying the loglevel to set on the rancher pods. One of: info, debug or trace. https://rancher.com/docs/rancher/v2.x/en/troubleshooting/logging/ | `string` | `"info"` | no |
 | <a name="input_rancher_node_count"></a> [rancher\_node\_count](#input\_rancher\_node\_count) | n/a | `number` | `1` | no |
 | <a name="input_rancher_password"></a> [rancher\_password](#input\_rancher\_password) | Password to set for admin user during bootstrap of Rancher Server, if not set random password will be generated | `string` | `""` | no |
+| <a name="input_rancher_values_yaml"></a> [rancher\_values\_yaml](#input\_rancher\_values\_yaml) | Absolute filepath to the desired values.yaml for the Rancher helm chart. Defaults to a yaml template stored in the install\_common module | `string` | `""` | no |
 | <a name="input_rancher_version"></a> [rancher\_version](#input\_rancher\_version) | Version of Rancher to install - Do not include the v prefix. | `string` | n/a | yes |
 | <a name="input_random_prefix"></a> [random\_prefix](#input\_random\_prefix) | Prefix to be used with random name generation | `string` | `"rancher"` | no |
 | <a name="input_rke2_config"></a> [rke2\_config](#input\_rke2\_config) | (Optional) A formatted string that will be appended to the final rke2 config yaml | `string` | `""` | no |

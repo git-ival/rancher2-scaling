@@ -1,3 +1,8 @@
+variable "name_prefix" {
+  type    = string
+  default = ""
+}
+
 variable "num_tokens" {
   type    = number
   default = 0
@@ -64,12 +69,14 @@ variable "aws_region" {
 variable "aws_access_key" {
   type        = string
   description = "AWS access key matching aws_secret_key"
+  default     = null
   sensitive   = true
 }
 
 variable "aws_secret_key" {
   type        = string
   description = "AWS secret key matching aws_access_key"
+  default     = null
   sensitive   = true
 }
 
@@ -81,6 +88,7 @@ variable "num_linode_credentials" {
 variable "linode_token" {
   type        = string
   description = "Linode API token with necessary permissions"
+  default     = null
   sensitive   = true
 }
 

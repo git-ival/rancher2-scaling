@@ -27,6 +27,6 @@ output "users-cluster" {
 }
 
 output "kube-configs" {
-  value = module.generate_kube_config[*].kubeconfig_path
+  value     = module.generate_kube_config[*].kubeconfig_path
   sensitive = false
 }

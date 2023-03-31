@@ -50,7 +50,7 @@ resource "aws_security_group_rule" "ingress_egress_all" {
 ### Create Nodes
 #############################
 
-data "aws_iam_instance_profile" "rancher_s3_access" {
+data "aws_iam_instance_profile" "this" {
   count = length(local.s3_instance_profile) > 0 ? 1 : 0
   name  = local.s3_instance_profile
 }
@@ -62,7 +62,7 @@ resource "aws_launch_template" "server" {
   user_data     = data.cloudinit_config.server.rendered
 
   iam_instance_profile {
-    arn = length(local.s3_instance_profile) > 0 ? data.aws_iam_instance_profile.rancher_s3_access[0].arn : null
+    arn = length(local.s3_instance_profile) > 0 ? data.aws_iam_instance_profile.this[0].arn : null
   }
 
   block_device_mappings {
@@ -77,7 +77,7 @@ resource "aws_launch_template" "server" {
 
   network_interfaces {
     delete_on_termination = true
-    security_groups       = compact(concat([aws_security_group.ingress.id], var.create_rancher_security_group ? [aws_security_group.rancher_server[0].id] : [""], var.extra_security_groups))
+    security_groups       = compact(concat([aws_security_group.ingress.id], var.create_rancher_security_group ? [aws_security_group.rancher_server[0].id] : [""], data.aws_security_group.extras[*].id))
   }
 
   lifecycle {
@@ -120,7 +120,7 @@ resource "aws_autoscaling_group" "server" {
 #############################
 ### Create Public Rancher DNS
 #############################
-resource "aws_route53_record" "rancher" {
+resource "aws_route53_record" "public" {
   count   = local.use_route53 && local.create_public_nlb == 1 ? 1 : 0
   zone_id = data.aws_route53_zone.dns_zone.0.zone_id
   name    = "${local.subdomain}.${local.domain}"
@@ -129,7 +129,7 @@ resource "aws_route53_record" "rancher" {
   records = [aws_lb.server-public-lb[0].dns_name]
 }
 
-resource "aws_route53_record" "rke1" {
+resource "aws_route53_record" "internal" {
   count   = local.use_route53 && local.create_internal_nlb == 1 ? 1 : 0
   zone_id = data.aws_route53_zone.dns_zone.0.zone_id
   name    = "${local.subdomain}-int.${local.domain}"

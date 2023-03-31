@@ -11,9 +11,9 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_local"></a> [local](#provider\_local) | 2.2.3 |
-| <a name="provider_rancher2"></a> [rancher2](#provider\_rancher2) | 1.25.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.4.3 |
+| <a name="provider_local"></a> [local](#provider\_local) | n/a |
+| <a name="provider_rancher2"></a> [rancher2](#provider\_rancher2) | n/a |
+| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
 
@@ -55,12 +55,13 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_aws_access_key"></a> [aws\_access\_key](#input\_aws\_access\_key) | AWS access key matching aws\_secret\_key | `string` | n/a | yes |
+| <a name="input_aws_access_key"></a> [aws\_access\_key](#input\_aws\_access\_key) | AWS access key matching aws\_secret\_key | `string` | `null` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region string | `string` | `"us-west-1"` | no |
-| <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | AWS secret key matching aws\_access\_key | `string` | n/a | yes |
+| <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | AWS secret key matching aws\_access\_key | `string` | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of rancher2\_cluster to operate on. Not used for the creation of clusters | `string` | `"local"` | no |
 | <a name="input_create_new_users"></a> [create\_new\_users](#input\_create\_new\_users) | n/a | `bool` | `true` | no |
-| <a name="input_linode_token"></a> [linode\_token](#input\_linode\_token) | Linode API token with necessary permissions | `string` | n/a | yes |
+| <a name="input_linode_token"></a> [linode\_token](#input\_linode\_token) | Linode API token with necessary permissions | `string` | `null` | no |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | n/a | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Name of rancher2\_namespace to operate on. Not used for the creation of namespaces | `string` | `"default"` | no |
 | <a name="input_num_aws_credentials"></a> [num\_aws\_credentials](#input\_num\_aws\_credentials) | n/a | `number` | `0` | no |
 | <a name="input_num_linode_credentials"></a> [num\_linode\_credentials](#input\_num\_linode\_credentials) | n/a | `number` | `0` | no |

@@ -17,7 +17,7 @@ terraform {
 }
 
 locals {
-  name_prefix                               = "${terraform.workspace}-bulk"
+  name_prefix                               = length(var.name_prefix) > 0 ? var.name_prefix : "${terraform.workspace}-bulk"
   secret_name_prefix                        = "${local.name_prefix}-secret"
   aws_cloud_cred_name_prefix                = "${local.name_prefix}-aws-cloud-cred"
   linode_cloud_cred_name_prefix             = "${local.name_prefix}-linode-cloud-cred"

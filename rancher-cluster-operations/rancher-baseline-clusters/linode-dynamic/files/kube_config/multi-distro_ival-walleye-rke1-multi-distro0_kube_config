@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Config
+clusters:
+- name: "ival-walleye-rke1-multi-distro0"
+  cluster:
+    server: "https://ival-walleye-rke1.qa.rancher.space/k8s/clusters/c-tb8dp"
+
+users:
+- name: "ival-walleye-rke1-multi-distro0"
+  user:
+    token: "kubeconfig-user-zt7czzzrtt:w26ms87l55dpx7f8lsr8t4584mlw7sn6d6mhrzpwgv6gxtz267t7bv"
+
+
+contexts:
+- name: "ival-walleye-rke1-multi-distro0"
+  context:
+    user: "ival-walleye-rke1-multi-distro0"
+    cluster: "ival-walleye-rke1-multi-distro0"
+
+current-context: "ival-walleye-rke1-multi-distro0"

@@ -18,24 +18,23 @@
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_cloud_credential"></a> [cloud\_credential](#module\_cloud\_credential) | ../../rancher-cluster-operations/rancher-cloud-credential | n/a |
-| <a name="module_cluster_v1"></a> [cluster\_v1](#module\_cluster\_v1) | ../../rancher-cluster-operations/rancher-cluster/v1 | n/a |
-| <a name="module_node_template"></a> [node\_template](#module\_node\_template) | ../../rancher-cluster-operations/rancher-node-template | n/a |
+No modules.
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [local_file.kube_config](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
-| [rancher2_node_pool.np](https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/node_pool) | resource |
+| [local_file.rke2](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
+| [rancher2_cloud_credential.shared_cred](https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/cloud_credential) | resource |
+| [rancher2_cluster_v2.rke2](https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/cluster_v2) | resource |
+| [rancher2_machine_config_v2.this](https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/machine_config_v2) | resource |
 | [random_id.index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [aws_ami.ubuntu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zone.selected_az](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zone) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_subnets.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
 | [aws_vpc.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+| [rancher2_cloud_credential.this](https://registry.terraform.io/providers/rancher/rancher2/latest/docs/data-sources/cloud_credential) | data source |
 
 ## Inputs
 
@@ -57,7 +56,7 @@
 | <a name="input_rancher_api_url"></a> [rancher\_api\_url](#input\_rancher\_api\_url) | api url for rancher server | `string` | n/a | yes |
 | <a name="input_rancher_token_key"></a> [rancher\_token\_key](#input\_rancher\_token\_key) | rancher server API token | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | Cloud provider-specific region string. Defaults to an AWS-specific region | `string` | `"us-west-1"` | no |
-| <a name="input_roles_per_pool"></a> [roles\_per\_pool](#input\_roles\_per\_pool) | A list of maps where each element contains keys that define the roles and quantity for a given node pool.<br>  Example: [<br>    {<br>      "quantity" = 3<br>      "etd" = true<br>      "control-plane" = true<br>      "worker" = true<br>    }<br>  ] | `list(map(string))` | n/a | yes |
+| <a name="input_roles_per_pool"></a> [roles\_per\_pool](#input\_roles\_per\_pool) | A list of maps where each element contains keys that define the roles and quantity for a given node pool.<br>  Example: [<br>    {<br>      "quantity" = 3<br>      "etd" = true<br>      "control-plane" = true<br>      "worker" = true<br>    }<br>  ] | `list(map(string))` | <pre>[<br>  {<br>    "control-plane": true,<br>    "etcd": true,<br>    "quantity": 3,<br>    "worker": true<br>  }<br>]</pre> | no |
 | <a name="input_security_groups"></a> [security\_groups](#input\_security\_groups) | A list of security group names (EC2-Classic) or IDs (default VPC) to associate with | `list(any)` | `[]` | no |
 | <a name="input_server_instance_type"></a> [server\_instance\_type](#input\_server\_instance\_type) | Cloud provider-specific instance type string to use for rke1 server | `string` | n/a | yes |
 | <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Size of the storage volume to use in GB | `string` | `"32"` | no |
@@ -67,9 +66,7 @@
 
 | Name | Description |
 |------|-------------|
-| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | n/a |
+| <a name="output_cluster_names"></a> [cluster\_names](#output\_cluster\_names) | n/a |
 | <a name="output_create_node_reqs"></a> [create\_node\_reqs](#output\_create\_node\_reqs) | n/a |
 | <a name="output_cred_name"></a> [cred\_name](#output\_cred\_name) | n/a |
-| <a name="output_kube_config"></a> [kube\_config](#output\_kube\_config) | n/a |
-| <a name="output_nt_name"></a> [nt\_name](#output\_nt\_name) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

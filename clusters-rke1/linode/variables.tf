@@ -186,3 +186,8 @@ variable "wait_for_active" {
   default     = false
   description = "Flag that determines if a cluster_sync resource should be used (this will block until the cluster is active or a timeout is reached)"
 }
+
+variable "auto_replace_timeout" {
+  type        = number
+  description = "Time to wait after Cluster becomes Active before deleting nodes that are unreachable"
+}

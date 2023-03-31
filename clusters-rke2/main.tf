@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     rancher2 = {
-      source  = "rancher/rancher2"
-      version = "1.21.0"
+      source = "rancher/rancher2"
+      # version = "1.21.0"
     }
     aws = {
       source = "hashicorp/aws"
@@ -85,7 +85,7 @@ resource "aws_key_pair" "this" {
 }
 
 resource "rancher2_machine_config_v2" "aws" {
-  generate_name = "${local.machine_pool_name}-np"
+  generate_name = local.machine_pool_name
   amazonec2_config {
     ami                  = data.aws_ami.ubuntu.id
     region               = var.aws_region

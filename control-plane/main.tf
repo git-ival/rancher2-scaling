@@ -119,6 +119,20 @@ module "aws_infra" {
   domain                 = local.domain
   r53_domain             = var.r53_domain
   s3_instance_profile    = var.s3_instance_profile
+  user_data_parts = var.k8s_distribution == "rke2" && (length(var.byo_certs_bucket_path) > 0 || length(var.private_ca_file) > 0) ? [{
+    filename     = "configure_tls_secret.sh"
+    content_type = "text/x-shellscript"
+    content = templatefile("${path.module}/modules/aws-infra/files/configure_tls_secret.sh", {
+      install_certmanager   = var.install_certmanager,
+      install_byo_certs     = length(var.byo_certs_bucket_path) > 0 ? true : false,
+      s3_bucket_region      = var.aws_region,
+      byo_certs_bucket_path = var.byo_certs_bucket_path,
+      tls_cert_file         = var.tls_cert_file,
+      tls_key_file          = var.tls_key_file,
+      private_ca            = length(var.private_ca_file) > 0 ? true : false,
+      private_ca_file       = var.private_ca_file,
+    })
+  }] : []
 }
 
 module "rke1" {

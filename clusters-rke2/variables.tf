@@ -109,8 +109,8 @@ variable "agent_env_vars" {
 }
 
 variable "create_keypair" {
-  type = bool
-  default = false
+  type        = bool
+  default     = false
   description = "Boolean used to determine whether or not to create a keypair or use a pre-existing one. Useful for easing the process of ssh-ing into clusters"
 }
 
@@ -169,4 +169,10 @@ variable "k8s_version" {
   type        = string
   default     = "v1.21.10+rke2r2"
   description = "Version of rke2 to use for downstream cluster"
+}
+
+variable "auto_replace_timeout" {
+  type        = number
+  default     = null
+  description = "Time to wait after Cluster becomes Active before deleting nodes that are unreachable"
 }

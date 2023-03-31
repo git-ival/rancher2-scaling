@@ -8,7 +8,6 @@ This component module can be used to create or retrieve a `rancher2_cloud_creden
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.0 |
-| <a name="requirement_rancher2"></a> [rancher2](#requirement\_rancher2) | >= 1.10.0 |
 
 ## Providers
 

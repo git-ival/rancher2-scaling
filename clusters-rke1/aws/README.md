@@ -44,6 +44,7 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_agent_env_vars"></a> [agent\_env\_vars](#input\_agent\_env\_vars) | A list of maps representing Rancher agent environment variables: https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/cluster#agent_env_vars | `list(map(string))` | `null` | no |
+| <a name="input_auto_replace_timeout"></a> [auto\_replace\_timeout](#input\_auto\_replace\_timeout) | Time to wait after Cluster becomes Active before deleting nodes that are unreachable | `number` | n/a | yes |
 | <a name="input_aws_access_key"></a> [aws\_access\_key](#input\_aws\_access\_key) | n/a | `string` | `null` | no |
 | <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | n/a | `string` | `null` | no |
 | <a name="input_cloud_cred_name"></a> [cloud\_cred\_name](#input\_cloud\_cred\_name) | (Optional) Name to use for the cloud credential. | `string` | `""` | no |

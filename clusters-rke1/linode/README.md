@@ -11,7 +11,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_local"></a> [local](#provider\_local) | 2.3.0 |
+| <a name="provider_local"></a> [local](#provider\_local) | 2.4.0 |
 | <a name="provider_rancher2"></a> [rancher2](#provider\_rancher2) | 1.25.0 |
 
 ## Modules
@@ -36,6 +36,7 @@
 |------|-------------|------|---------|:--------:|
 | <a name="input_agent_env_vars"></a> [agent\_env\_vars](#input\_agent\_env\_vars) | A list of maps representing Rancher agent environment variables: https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/cluster#agent_env_vars | `list(map(string))` | `null` | no |
 | <a name="input_authorized_users"></a> [authorized\_users](#input\_authorized\_users) | (Optional) Linode user accounts (seperated by commas) whose Linode SSH keys will be permitted root access to the created node. | `string` | `null` | no |
+| <a name="input_auto_replace_timeout"></a> [auto\_replace\_timeout](#input\_auto\_replace\_timeout) | Time to wait after Cluster becomes Active before deleting nodes that are unreachable | `number` | n/a | yes |
 | <a name="input_cloud_cred_name"></a> [cloud\_cred\_name](#input\_cloud\_cred\_name) | (Optional) Name to use for the cloud credential. | `string` | `""` | no |
 | <a name="input_cluster_labels"></a> [cluster\_labels](#input\_cluster\_labels) | (Optional) Labels to add to each provisioned cluster | `map(any)` | `{}` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | (Optional) Desired cluster name, if not set then one will be generated | `string` | `""` | no |
@@ -67,5 +68,6 @@
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | n/a |
 | <a name="output_create_node_reqs"></a> [create\_node\_reqs](#output\_create\_node\_reqs) | n/a |
 | <a name="output_cred_name"></a> [cred\_name](#output\_cred\_name) | n/a |
+| <a name="output_kube_config"></a> [kube\_config](#output\_kube\_config) | n/a |
 | <a name="output_nt_name"></a> [nt\_name](#output\_nt\_name) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

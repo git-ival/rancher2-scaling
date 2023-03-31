@@ -100,16 +100,16 @@ module "node_template" {
 }
 
 resource "rancher2_node_pool" "np" {
-  count            = local.node_pool_count
-  cluster_id       = module.cluster_v1.id
-  name             = "${local.node_pool_name}-${count.index}"
-  hostname_prefix  = "${local.node_pool_name}-pool${count.index}-node"
-  node_template_id = module.node_template.id
-  quantity         = try(tonumber(var.roles_per_pool[count.index]["quantity"]), false)
-  control_plane    = try(tobool(var.roles_per_pool[count.index]["control-plane"]), false)
-  etcd             = try(tobool(var.roles_per_pool[count.index]["etcd"]), false)
-  worker           = try(tobool(var.roles_per_pool[count.index]["worker"]), false)
-  delete_not_ready_after_secs = 0
+  count                       = local.node_pool_count
+  cluster_id                  = module.cluster_v1.id
+  name                        = "${local.node_pool_name}-${count.index}"
+  hostname_prefix             = "${local.node_pool_name}-pool${count.index}-node"
+  node_template_id            = module.node_template.id
+  quantity                    = try(tonumber(var.roles_per_pool[count.index]["quantity"]), false)
+  control_plane               = try(tobool(var.roles_per_pool[count.index]["control-plane"]), false)
+  etcd                        = try(tobool(var.roles_per_pool[count.index]["etcd"]), false)
+  worker                      = try(tobool(var.roles_per_pool[count.index]["worker"]), false)
+  delete_not_ready_after_secs = var.auto_replace_timeout
 }
 
 module "cluster_v1" {

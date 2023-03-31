@@ -57,5 +57,8 @@ No modules.
 | <a name="output_default_project_id"></a> [default\_project\_id](#output\_default\_project\_id) | n/a |
 | <a name="output_driver"></a> [driver](#output\_driver) | n/a |
 | <a name="output_id"></a> [id](#output\_id) | n/a |
+| <a name="output_insecure_registration_command"></a> [insecure\_registration\_command](#output\_insecure\_registration\_command) | n/a |
 | <a name="output_kube_config"></a> [kube\_config](#output\_kube\_config) | n/a |
+| <a name="output_name"></a> [name](#output\_name) | n/a |
+| <a name="output_registration_command"></a> [registration\_command](#output\_registration\_command) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

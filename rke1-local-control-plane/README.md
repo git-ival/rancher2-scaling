@@ -167,9 +167,11 @@ The port `8443` can be adjusted as need for your local system.
 | <a name="input_node_type"></a> [node\_type](#input\_node\_type) | Cloud provider-specific node/instance type used for the rancher servers | `string` | `null` | no |
 | <a name="input_private_ca_file"></a> [private\_ca\_file](#input\_private\_ca\_file) | Optional: String that defines the name of the private CA .pem file in the specified S3 bucket's cert tarball | `string` | `""` | no |
 | <a name="input_r53_domain"></a> [r53\_domain](#input\_r53\_domain) | DNS domain for Route53 zone (defaults to domain if unset) | `string` | `""` | no |
+| <a name="input_rancher_additional_values"></a> [rancher\_additional\_values](#input\_rancher\_additional\_values) | A list of objects representing values for the Rancher helm chart | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
 | <a name="input_rancher_chart"></a> [rancher\_chart](#input\_rancher\_chart) | Helm chart to use for Rancher install | `string` | `"stable"` | no |
 | <a name="input_rancher_charts_branch"></a> [rancher\_charts\_branch](#input\_rancher\_charts\_branch) | The github branch for the desired Rancher chart version | `string` | `"release-v2.6"` | no |
 | <a name="input_rancher_charts_repo"></a> [rancher\_charts\_repo](#input\_rancher\_charts\_repo) | The URL for the desired Rancher charts | `string` | `"https://git.rancher.io/charts"` | no |
+| <a name="input_rancher_env_vars"></a> [rancher\_env\_vars](#input\_rancher\_env\_vars) | A list of objects representing Rancher environment variables | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
 | <a name="input_rancher_image"></a> [rancher\_image](#input\_rancher\_image) | n/a | `string` | `"rancher/rancher"` | no |
 | <a name="input_rancher_image_tag"></a> [rancher\_image\_tag](#input\_rancher\_image\_tag) | Rancher image tag to install, this can differ from rancher\_version which is the chart being used to install Rancher | `string` | `"master-head"` | no |
 | <a name="input_rancher_loglevel"></a> [rancher\_loglevel](#input\_rancher\_loglevel) | A string specifying the loglevel to set on the rancher pods. One of: info, debug or trace. https://rancher.com/docs/rancher/v2.x/en/troubleshooting/logging/ | `string` | `"info"` | no |
