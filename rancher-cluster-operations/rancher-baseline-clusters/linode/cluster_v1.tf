@@ -59,6 +59,6 @@ resource "rancher2_cluster_sync" "rke1" {
 
 resource "local_file" "rke1_kube_config" {
   content         = local.rke1_kube_config
-  filename        = "${path.module}/files/kube_config/${terraform.workspace}_${module.rke1.name}_kube_config"
+  filename        = "${path.module}/files/kube_config/${module.rke1.name}_kube_config"
   file_permission = "0700"
 }

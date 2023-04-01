@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Config
+clusters:
+- name: "ival-phoenix-rke1-multi-distro-k3s"
+  cluster:
+    server: "https://ival-phoenix-rke1.qa.rancher.space/k8s/clusters/c-m-5qf9pcxj"
+
+users:
+- name: "ival-phoenix-rke1-multi-distro-k3s"
+  user:
+    token: "kubeconfig-user-6glwz6wtst:z76s4nqwxltbslmzlp48mml5jn6gcf9rjbzf5vtgpgpbks257gf8n6"
+
+
+contexts:
+- name: "ival-phoenix-rke1-multi-distro-k3s"
+  context:
+    user: "ival-phoenix-rke1-multi-distro-k3s"
+    cluster: "ival-phoenix-rke1-multi-distro-k3s"
+
+current-context: "ival-phoenix-rke1-multi-distro-k3s"

@@ -15,8 +15,8 @@ function get_heap_logs() {
   for pod in $(kubectl -n cattle-system get pods --no-headers -l status.phase=Running -l app=rancher | grep Running | cut -d ' ' -f1); do
     echo "getting mem profile for \"${pod}\""
     kubectl -n cattle-system exec "${pod}" -- curl -s http://localhost:6060/debug/pprof/heap -o mem-profile.log
-    kubectl -n cattle-system cp "${pod}:mem-profile.log" "${pod}-${1}_clusters-heap.log"
-    echo "saved memory profile \"${pod}-${1}_clusters-heap.log\""
+    kubectl -n cattle-system cp "${pod}:mem-profile.log" "${pod}-${1}_deployments-heap.log"
+    echo "saved memory profile \"${pod}-${1}_deployments-heap.log\""
   done
 }
 
@@ -24,8 +24,8 @@ function get_profile_logs() {
   for pod in $(kubectl -n cattle-system get pods --no-headers -l status.phase=Running -l app=rancher | grep Running | cut -d ' ' -f1); do
     echo "getting cpu profile for \"${pod}\""
     kubectl -n cattle-system exec "${pod}" -- curl -s http://localhost:6060/debug/pprof/profile -o cpu-profile.log
-    kubectl -n cattle-system cp "${pod}:cpu-profile.log" "${pod}-${1}_clusters-profile.log"
-    echo "saved cpu profile \"${pod}-${1}_clusters-profile.log\""
+    kubectl -n cattle-system cp "${pod}:cpu-profile.log" "${pod}-${1}_deployments-profile.log"
+    echo "saved cpu profile \"${pod}-${1}_deployments-profile.log\""
   done
 }
 
@@ -61,7 +61,7 @@ function batch_scale() {
   counter=1
   NUM_BATCHES=$((TARGET_NUM_DEPLOYMENTS / (BATCH_NUM_DEPLOYMENTS)))
   HALF_COMPLETE=$(((NUM_BATCHES + 1) / 2)) # rounded up
-  while [ "${counter}" -le $TARGET_NUM_DEPLOYMENTS ]; do
+  while [ "${counter}" -le $NUM_BATCHES ]; do
     BATCH_SET_LIMIT=$((counter * BATCH_NUM_DEPLOYMENTS))
     echo "Creating ${BATCH_SET_LIMIT} deployments"
     export KUBECONFIG="${downstream_kube_config}"

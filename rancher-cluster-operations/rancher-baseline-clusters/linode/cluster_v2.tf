@@ -1,6 +1,6 @@
 resource "rancher2_machine_config_v2" "this" {
   count         = 2
-  generate_name = local.node_template_name
+  generate_name = "${local.node_template_name}${count.index}"
   linode_config {
     image            = var.image
     instance_type    = var.server_instance_type
@@ -12,14 +12,7 @@ resource "rancher2_machine_config_v2" "this" {
 resource "rancher2_cluster_v2" "rke2" {
   name               = "${local.cluster_name}-rke2"
   kubernetes_version = var.rke2_version
-  # dynamic "agent_env_vars" {
-  #   for_each = var.agent_env_vars != null ? var.agent_env_vars : []
-  #   iterator = env_var
-  #   content {
-  #     name  = env_var.value.name
-  #     value = env_var.value.value
-  #   }
-  # }
+
   rke_config {
     dynamic "machine_pools" {
       for_each = local.roles_per_pool
@@ -50,14 +43,7 @@ resource "rancher2_cluster_v2" "rke2" {
 resource "rancher2_cluster_v2" "k3s" {
   name               = "${local.cluster_name}-k3s"
   kubernetes_version = var.k3s_version
-  # dynamic "agent_env_vars" {
-  #   for_each = var.agent_env_vars != null ? var.agent_env_vars : []
-  #   iterator = env_var
-  #   content {
-  #     name  = env_var.value.name
-  #     value = env_var.value.value
-  #   }
-  # }
+
   rke_config {
     dynamic "machine_pools" {
       for_each = local.roles_per_pool
@@ -96,12 +82,12 @@ resource "rancher2_cluster_sync" "k3s" {
 
 resource "local_file" "rke2" {
   content         = rancher2_cluster_v2.rke2.kube_config
-  filename        = "${path.module}/files/kube_config/${terraform.workspace}_${rancher2_cluster_v2.rke2.name}_kube_config"
+  filename        = "${path.module}/files/kube_config/${rancher2_cluster_v2.rke2.name}_kube_config"
   file_permission = "0700"
 }
 
 resource "local_file" "k3s" {
-  content         = rancher2_cluster_v2.rke2.kube_config
-  filename        = "${path.module}/files/kube_config/${terraform.workspace}_${rancher2_cluster_v2.k3s.name}_kube_config"
+  content         = rancher2_cluster_v2.k3s.kube_config
+  filename        = "${path.module}/files/kube_config/${rancher2_cluster_v2.k3s.name}_kube_config"
   file_permission = "0700"
 }
