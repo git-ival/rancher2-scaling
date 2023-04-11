@@ -1,0 +1,63 @@
+variable "ssh_keys" {
+  type        = list(any)
+  default     = []
+  description = "SSH keys to inject into the EC2 instances"
+}
+
+variable "security_groups" {
+  type        = list(any)
+  default     = []
+  description = "A list of security group names (EC2-Classic) or IDs (default VPC) to associate with"
+}
+
+variable "server_instance_type" {
+  type        = string
+  description = "Cloud provider-specific instance type string to use for rke1 server"
+}
+
+variable "volume_size" {
+  type        = string
+  default     = "32"
+  description = "Size of the storage volume to use in GB"
+}
+
+variable "volume_type" {
+  type        = string
+  default     = "gp2"
+  description = "Type of storage volume to use"
+}
+
+variable "image" {
+  type        = string
+  default     = "ubuntu-minimal/images/*/ubuntu-bionic-18.04-*"
+  description = "Specific AWS AMI or AMI name filter to use"
+}
+
+variable "iam_instance_profile" {
+  type    = string
+  default = null
+}
+
+variable "install_docker_version" {
+  type        = string
+  default     = "20.10"
+  description = "The version of docker to install. Available docker versions can be found at: https://github.com/rancher/install-docker"
+}
+
+variable "k3d_version" {
+  type        = string
+  default     = "v5.4.9"
+  description = "k3d version to use during cluster create (release tag with the 'v')"
+}
+
+variable "k3s_server_args" {
+  type        = string
+  default     = ""
+  description = "extra args to pass to k3s server"
+}
+
+variable "k3s_cluster_secret" {
+  type        = string
+  default     = ""
+  description = "k3s cluster secret"
+}

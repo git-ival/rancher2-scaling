@@ -1,40 +1,12 @@
-terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    linode = {
-      source = "linode/linode"
-    }
-    random = {
-      source = "hashicorp/random"
-    }
-    null = {
-      source = "hashicorp/null"
-    }
-  }
-}
-
-resource "random_pet" "identifier" {
-  keepers = {
-  }
-  prefix = var.random_prefix
-  length = 1
-}
-
 locals {
   name_max_length   = 32
   firewall_name     = var.label != null ? substr(var.label, 0, local.name_max_length) : substr("${local.name}-rancher-firewall", 0, local.name_max_length)
-  name              = try(length(var.subdomain) > 0 ? var.subdomain : random_pet.identifier.id, random_pet.identifier.id)
+  rancher_subdomain = split(".", split("//", "${var.rancher_api_url}")[1])[0]
+  name_suffix       = length(var.name_suffix) > 0 ? var.name_suffix : "${terraform.workspace}"
+  cluster_name      = length(var.cluster_name) > 0 ? var.cluster_name : "${substr("${local.rancher_subdomain}-${local.name_suffix}", 0, local.name_max_length)}"
   group             = try(length(var.group) > 0 ? var.group : local.name)
   nodebalancer_name = try(var.label != null, false) ? substr(var.label, 0, local.name_max_length) : substr(local.name, 0, local.name_max_length)
-  general_inbound_rules = [
-    {
-      label    = "allow-http"
-      action   = "ACCEPT"
-      protocol = "TCP"
-      ports    = "80"
-      ipv4     = ["0.0.0.0/0"]
-      ipv6     = ["::/0"]
-    },
+  rancher_inbound_rules = [
     {
       label    = "allow-https"
       action   = "ACCEPT"
@@ -42,18 +14,9 @@ locals {
       ports    = "443"
       ipv4     = ["0.0.0.0/0"]
       ipv6     = ["::/0"]
-    },
-    {
-      label    = "allow-ssh"
-      action   = "ACCEPT"
-      protocol = "TCP"
-      ports    = "22"
-      ipv4     = ["0.0.0.0/0"]
-      ipv6     = ["::/0"]
     }
   ]
-
-  rancher_inbound_rules = [
+  cluster_inbound_rules = [
     {
       label    = "docker-daemon-tls"
       action   = "ACCEPT"
@@ -199,8 +162,7 @@ locals {
       ipv6     = ["::/0"]
     }
   ]
-  final_rules = concat(local.general_inbound_rules, local.rancher_inbound_rules)
-  nlb_ports   = [80, 443, 6443]
+  final_rules = concat(local.rancher_inbound_rules, local.cluster_inbound_rules)
 }
 
 resource "linode_instance" "this" {
@@ -216,7 +178,7 @@ resource "linode_instance" "this" {
 
   group       = local.group
   tags        = concat(var.tags, [local.name])
-  swap_size   = 512
+  swap_size   = var.swap_size
   private_ip  = var.private_ip
   shared_ipv4 = var.shared_ipv4
 
@@ -232,34 +194,6 @@ resource "linode_instance" "this" {
   watchdog_enabled = false
 }
 
-module "rancher_nodebalancer" {
-  count  = var.nlb ? 1 : 0
-  source = "./rancher-nodebalancer"
-  providers = {
-    linode = linode
-  }
-
-  region     = var.region
-  node_count = var.node_count
-  linodes    = data.linode_instances.this.instances
-  label      = local.nodebalancer_name
-  tags       = concat(var.tags, [local.name])
-}
-
-data "linode_domain" "this" {
-  domain = var.domain
-}
-
-resource "linode_domain_record" "this" {
-  count       = var.nlb ? 1 : 0
-  domain_id   = data.linode_domain.this.id
-  record_type = "CNAME"
-  ttl_sec     = 30
-
-  name   = local.name
-  target = var.nlb ? module.rancher_nodebalancer[0].hostname : data.linode_instances.this.instances[count.index].ip_address
-}
-
 module "rancher_firewall" {
   source = "./firewall"
   providers = {
@@ -273,49 +207,4 @@ module "rancher_firewall" {
   outbound_policy = "ACCEPT"
   linodes         = linode_instance.this[*].id
   tags            = concat(var.tags, [local.name])
-}
-
-data "linode_instances" "this" {
-  filter {
-    name     = "tags"
-    values   = ["${local.name}"]
-    match_by = "exact"
-  }
-  depends_on = [linode_instance.this]
-}
-
-resource "null_resource" "setup" {
-  count = var.node_count
-
-  connection {
-    type        = "ssh"
-    host        = coalesce(data.linode_instances.this.instances[count.index].ip_address, data.linode_instances.this.instances[count.index].private_ip_address)
-    user        = "root"
-    port        = 22
-    private_key = file(var.ssh_key_path)
-  }
-
-  provisioner "file" {
-    content     = file("${path.module}/files/k8s-setup.sh")
-    destination = "/tmp/k8s-setup.sh"
-  }
-
-  provisioner "file" {
-    content = templatefile("${path.module}/files/docker-install.sh", {
-      install_docker_version = "20.10",
-    })
-    destination = "/tmp/docker-install.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 0700 /tmp/k8s-setup.sh",
-      "chmod 0700 /tmp/docker-install.sh",
-      "/tmp/k8s-setup.sh",
-      "/tmp/docker-install.sh",
-      "sleep 20"
-    ]
-  }
-
-  depends_on = [data.linode_instances.this]
 }

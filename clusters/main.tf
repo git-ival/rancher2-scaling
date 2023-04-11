@@ -85,3 +85,11 @@ output "cluster_registration_tokens" {
   description = "The k3s cluster registration token"
   value       = rancher2_cluster.k3s[*].cluster_registration_token[0]
 }
+
+output "public_ip" {
+  value = aws_instance.k3s-server.public_ip
+}
+
+output "instance_id" {
+  value = aws_instance.k3s-server.id
+}
