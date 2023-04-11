@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-script_dir=$(dirname "$0")
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 KUBE_CONFIG=${1}
 BATCH_NUM_NODES=${2:-5}

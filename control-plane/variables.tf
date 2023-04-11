@@ -117,7 +117,7 @@ variable "install_certmanager" {
 
 variable "certmanager_version" {
   type        = string
-  default     = "1.4.2"
+  default     = "1.10.2"
   description = "Version of cert-manager to install"
 }
 

@@ -12,7 +12,6 @@ terraform {
     }
   }
 }
-
 locals {
   name_prefix                               = length(var.name_prefix) > 0 ? var.name_prefix : "${terraform.workspace}-bulk"
   secret_name_prefix                        = "${local.name_prefix}-secret"
@@ -42,7 +41,7 @@ locals {
   all_secrets = [for secret in module.secrets[*] : {
     "name"         = "${local.secret_name_prefix}-${index(module.secrets[*], secret)}",
     "id"           = secret.id,
-    "namespace_id" = data.rancher2_namespace.this.id,
+    "namespace_id" = data.rancher2_namespace.this[0].id,
     "cluster_id"   = data.rancher2_cluster.this.id,
     "project_id"   = data.rancher2_project.this[0].id,
     "description"  = secret.description,
@@ -90,11 +89,14 @@ data "rancher2_project" "this" {
   name       = var.project
 }
 
+### Pre-existing namespace, currently only used for bulk secrets creation
 data "rancher2_namespace" "this" {
+  count      = length(var.namespace) > 0 && var.num_secrets > 0 ? 1 : 0
   name       = var.namespace
   project_id = data.rancher2_project.this[0].id
 }
 
+### Bulk create rancher tokens
 resource "rancher2_token" "this" {
   count       = var.num_tokens
   cluster_id  = data.rancher2_cluster.this.id
@@ -103,6 +105,7 @@ resource "rancher2_token" "this" {
   ttl         = 0
 }
 
+### Bulk create secrets
 module "secrets" {
   source      = "../rancher-secret"
   use_v2      = false
@@ -111,10 +114,11 @@ module "secrets" {
   name        = "${local.secret_name_prefix}-${count.index}"
   description = "Bulk Secret ${count.index}"
   project_id  = data.rancher2_project.this[0].id
-  namespace   = data.rancher2_namespace.this.id
+  namespace   = data.rancher2_namespace.this[0].id
   data        = var.secret_data
 }
 
+### Bulk create v2 secrets
 module "secrets_v2" {
   source     = "../rancher-secret"
   use_v2     = true
@@ -128,6 +132,7 @@ module "secrets_v2" {
   data       = var.secret_data
 }
 
+### Bulk create aws cloud credentials
 module "aws_cloud_credentials" {
   source         = "../rancher-cloud-credential"
   count          = var.num_aws_credentials
@@ -141,6 +146,7 @@ module "aws_cloud_credentials" {
   }
 }
 
+### Bulk create linode cloud credentials
 module "linode_cloud_credentials" {
   source         = "../rancher-cloud-credential"
   count          = var.num_linode_credentials
@@ -152,6 +158,7 @@ module "linode_cloud_credentials" {
   }
 }
 
+### Bulk create projects, unused elsehwere
 resource "rancher2_project" "this" {
   count            = var.num_projects
   name             = "${local.project_name_prefix}-${count.index}"
@@ -159,6 +166,7 @@ resource "rancher2_project" "this" {
   wait_for_cluster = true
 }
 
+### Bulk create namespaces in the pre-created project, unused elsewhere
 resource "rancher2_namespace" "this" {
   count            = var.num_namespaces
   name             = "${local.namespace_name_prefix}-${count.index}"
@@ -166,9 +174,7 @@ resource "rancher2_namespace" "this" {
   wait_for_cluster = true
 }
 
-# TODO: Add `rancher2_user`, `rancher2_global_role `, `rancher2_global_role_binding` and/or `rancher2_role_template`, and `rancher2_project_role_template_binding` creation
-
-# Create new users
+### Bulk create rancher users
 resource "rancher2_user" "this" {
   count    = var.create_new_users ? var.num_users : 0
   name     = "${local.user_name_prefix}-${count.index}"
@@ -177,6 +183,7 @@ resource "rancher2_user" "this" {
   enabled  = true
 }
 
+### Retrieve all rancher users, pre-existing and created
 data "rancher2_user" "this" {
   for_each = local.all_users
   name     = length(each.value.name) > 0 ? each.value.name : null
@@ -191,20 +198,26 @@ resource "random_id" "this" {
   byte_length = 2
 }
 
+### Create a new global role with specific permissions
 resource "rancher2_global_role" "this" {
   count            = var.user_global_binding ? 1 : 0
   name             = "${local.global_role_name_prefix}-${random_id.this[0].dec}"
   new_user_default = true
   description      = "Terraform global role scale test"
-
-  rules {
-    api_groups = ["*"]
-    resources  = ["secrets"]
-    verbs      = ["create"]
+  dynamic "rules" {
+    for_each = var.user_global_rules
+    iterator = rule
+    content {
+      api_groups        = rule.value.api_groups
+      non_resource_urls = rule.value.non_resource_urls
+      resource_names    = rule.value.resource_names
+      resources         = rule.value.resources
+      verbs             = rule.value.verbs
+    }
   }
 }
 
-# Create a new rancher2 global_role_binding for each user
+### Create a new global role binding for each user
 resource "rancher2_global_role_binding" "this" {
   for_each       = var.user_global_binding ? local.found_users : {}
   name           = "${each.value.name}-${random_id.this[0].dec}"
@@ -212,19 +225,27 @@ resource "rancher2_global_role_binding" "this" {
   user_id        = each.value.id
 }
 
+### Create a new cluster role template
 resource "rancher2_role_template" "cluster" {
   count        = var.user_cluster_binding ? 1 : 0
   name         = "${local.role_template_name_prefix}-cluster-${random_id.this[0].dec}"
   context      = "cluster"
   default_role = true
   description  = "Terraform role template scale test"
-  rules {
-    api_groups = ["*"]
-    resources  = ["secrets"]
-    verbs      = ["create"]
+  dynamic "rules" {
+    for_each = var.user_cluster_rules
+    iterator = rule
+    content {
+      api_groups        = rule.value.api_groups
+      non_resource_urls = rule.value.non_resource_urls
+      resource_names    = rule.value.resource_names
+      resources         = rule.value.resources
+      verbs             = rule.value.verbs
+    }
   }
 }
 
+### Create a new cluster role binding for each user
 resource "rancher2_cluster_role_template_binding" "this" {
   for_each         = var.user_cluster_binding ? local.found_users : {}
   name             = "${each.value.name}-${random_id.this[0].dec}"
@@ -233,25 +254,34 @@ resource "rancher2_cluster_role_template_binding" "this" {
   user_id          = each.value.id
 }
 
+### Create a new project for role binding on users
 resource "rancher2_project" "user_roles" {
   count      = var.user_project_binding ? 1 : 0
   name       = "${local.project_name_prefix}-user-roles-${random_id.this[0].dec}"
   cluster_id = data.rancher2_cluster.this.id
 }
 
+### Create a new project role template
 resource "rancher2_role_template" "project" {
   count        = var.user_project_binding ? 1 : 0
   name         = "${local.role_template_name_prefix}-project-${random_id.this[0].dec}"
   context      = "project"
   default_role = true
   description  = "Terraform role template scale test"
-  rules {
-    api_groups = ["*"]
-    resources  = ["secrets"]
-    verbs      = ["create"]
+  dynamic "rules" {
+    for_each = var.user_project_roles
+    iterator = rule
+    content {
+      api_groups        = rule.value.api_groups
+      non_resource_urls = rule.value.non_resource_urls
+      resource_names    = rule.value.resource_names
+      resources         = rule.value.resources
+      verbs             = rule.value.verbs
+    }
   }
 }
 
+### Create a new project role binding for each user
 resource "rancher2_project_role_template_binding" "this" {
   for_each         = var.user_project_binding ? local.found_users : {}
   name             = "${each.value.name}-${random_id.this[0].dec}"
