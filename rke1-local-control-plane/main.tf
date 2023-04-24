@@ -1,30 +1,3 @@
-terraform {
-  required_version = ">= 0.14"
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-    }
-    local = {
-      source = "hashicorp/local"
-    }
-    random = {
-      source = "hashicorp/random"
-    }
-    rancher2 = {
-      source = "rancher/rancher2"
-    }
-    helm = {
-      source = "hashicorp/helm"
-    }
-    linode = {
-      source = "linode/linode"
-    }
-  }
-  backend "local" {
-    path = "rancher.tfstate"
-  }
-}
-
 resource "random_pet" "identifier" {
   keepers = {
   }

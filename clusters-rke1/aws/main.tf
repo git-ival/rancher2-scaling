@@ -1,20 +1,29 @@
 terraform {
   required_version = ">= 0.13"
   required_providers {
-    rancher2 = {
-      source = "rancher/rancher2"
-    }
-    aws = {
-      source = "hashicorp/aws"
-    }
     cloudinit = {
-      source = "hashicorp/cloudinit"
+      source  = "hashicorp/cloudinit"
+      version = ">= 2.3.2, <= 3.0.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.2.3, <= 3.0.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
+      version = ">= 3.4.3, <= 4.0.0"
     }
     null = {
-      source = "hashicorp/null"
+      source  = "hashicorp/null"
+      version = ">= 3.2.1, <= 4.0.0"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 4.60.0, <= 5.0.0"
+    }
+    rancher2 = {
+      source  = "rancher/rancher2"
+      version = ">= 2.0.0, <= 3.0.0"
     }
   }
 }

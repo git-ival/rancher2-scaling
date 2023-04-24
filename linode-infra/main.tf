@@ -2,13 +2,16 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     linode = {
-      source = "linode/linode"
+      source  = "linode/linode"
+      version = ">= 1.30.0, <= 2.0.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
+      version = ">= 3.4.3, <= 4.0.0"
     }
     null = {
-      source = "hashicorp/null"
+      source  = "hashicorp/null"
+      version = ">= 3.2.1, <= 4.0.0"
     }
   }
 }

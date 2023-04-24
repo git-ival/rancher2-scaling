@@ -2,13 +2,16 @@ terraform {
   required_version = ">= 0.14"
   required_providers {
     rancher2 = {
-      source = "rancher/rancher2"
+      source  = "rancher/rancher2"
+      version = ">= 2.0.0, <= 3.0.0"
     }
     local = {
-      source = "hashicorp/local"
+      source  = "hashicorp/local"
+      version = ">= 2.2.3, <= 3.0.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
+      version = ">= 3.4.3, <= 4.0.0"
     }
   }
 }

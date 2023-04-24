@@ -1,13 +1,16 @@
 terraform {
   required_providers {
     rancher2 = {
-      source = "rancher/rancher2"
+      source  = "rancher/rancher2"
+      version = ">= 2.0.0, <= 3.0.0"
     }
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
+      version = ">= 2.7.1, <= 3.0.0"
     }
     null = {
-      source = "hashicorp/null"
+      source  = "hashicorp/null"
+      version = ">= 3.1.1, <= 4.0.0"
     }
   }
 }

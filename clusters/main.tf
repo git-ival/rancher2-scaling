@@ -1,14 +1,17 @@
 terraform {
   required_version = ">= 1.0"
   required_providers {
-    rancher2 = {
-      source = "rancher/rancher2"
+    cloudinit = {
+      source  = "hashicorp/cloudinit"
+      version = ">= 2.2.0, <= 3.0.0"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = ">= 4.46.0, <= 5.0.0"
     }
-    cloudinit = {
-      source = "hashicorp/cloudinit"
+    rancher2 = {
+      source  = "rancher/rancher2"
+      version = ">= 2.0.0, <= 3.0.0"
     }
   }
 }
