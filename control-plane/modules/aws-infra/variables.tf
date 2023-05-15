@@ -135,7 +135,8 @@ variable "use_route53" {
 }
 
 variable "user" {
-  type = string
+  type        = string
+  description = "String to be used for tagging purposes to identify owner/user"
 }
 
 variable "user_data_parts" {

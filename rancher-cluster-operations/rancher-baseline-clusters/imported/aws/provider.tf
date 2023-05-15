@@ -7,11 +7,15 @@ terraform {
     }
     rancher2 = {
       source  = "rancher/rancher2"
-      version = ">= 2.0.0, <= 3.0.0"
+      version = ">= 2.0.0, <= 4.0.0"
     }
     random = {
       source  = "hashicorp/random"
       version = ">= 3.4.3, <= 4.0.0"
+    }
+    ssh = {
+      source  = "loafoe/ssh"
+      version = ">= 2.6.0, <= 3.0.0"
     }
   }
   backend "local" {

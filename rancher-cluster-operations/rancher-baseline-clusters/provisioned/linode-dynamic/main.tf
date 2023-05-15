@@ -19,9 +19,10 @@ locals {
   } : null
   ### Cluster and node pool configuration
   cluster_configs = [for i, config in var.cluster_configs : {
-    name = substr("${config.k8s_distribution}-${local.name_suffix}${i}", 0, local.name_max_length)
+    name             = length(config.name) > 0 ? config.name : substr("${config.k8s_distribution}-${local.name_suffix}${i}", 0, local.name_max_length)
     k8s_distribution = config.k8s_distribution
     k8s_version      = config.k8s_version
+    psa_config       = config.psa_config
     roles_per_pool   = config.roles_per_pool
   }]
   v1_configs = {
@@ -99,6 +100,7 @@ module "bulk_components" {
 
   cluster_name         = each.value.name
   project              = each.value.project
+  namespace            = var.num_secrets > 0 ? "baseline-${each.value.id}-namespace-0" : null
   num_projects         = var.num_projects
   num_namespaces       = var.num_namespaces
   num_secrets          = var.num_secrets

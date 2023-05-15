@@ -62,3 +62,13 @@ variable "network_config" {
   default     = null
   description = "(Optional/Computed) Network config options for any valid cluster config (object with optional attributes for any network-related options defined here https://registry.terraform.io/providers/rancher/rancher2/latest/docs/resources/cluster)"
 }
+
+variable "default_pod_security_admission_configuration_template_name" {
+  type        = string
+  default     = null
+  description = "A string specifying which default Pod Security Admission Configuration Template (PSACT) to use"
+  validation {
+    condition     = var.default_pod_security_admission_configuration_template_name == null ? true : length(var.default_pod_security_admission_configuration_template_name) > 0 || contains([null, "", "rancher-privileged", "rancher-restricted"], var.default_pod_security_admission_configuration_template_name)
+    error_message = "var.default_pod_security_admission_configuration_template_name must be one of [null, '','rancher-privileged', 'rancher-restricted'] OR the name of an existing PSACT."
+  }
+}

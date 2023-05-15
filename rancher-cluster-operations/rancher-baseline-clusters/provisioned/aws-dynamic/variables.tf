@@ -107,6 +107,7 @@ variable "cluster_configs" {
     k8s_version      = string
     k8s_distribution = string
     name             = optional(string)
+    psa_config       = optional(string)
     roles_per_pool = optional(list(map(string)), [
       {
         "quantity"      = 3
@@ -159,6 +160,10 @@ variable "cluster_configs" {
   validation {
     condition     = alltrue([for config in var.cluster_configs : sum([for i, pool in config.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["worker"] == "true", false)]) >= 1])
     error_message = "The number of worker nodes per cluster must be >= 1."
+  }
+  validation {
+    condition     = alltrue([for i, config in var.cluster_configs : config.psa_config == null ? true : length(config.psa_config) > 0 || contains([null, "", "rancher-privileged", "rancher-restricted"], config.psa_config)])
+    error_message = "All var.cluster_configs[*].psa_config must be one of [null, '','rancher-privileged', 'rancher-restricted'] OR the name of an existing PSACT."
   }
 }
 

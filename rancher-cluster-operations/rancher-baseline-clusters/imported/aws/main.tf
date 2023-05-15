@@ -19,7 +19,7 @@ locals {
   cluster_name      = length(var.cluster_name) > 0 ? var.cluster_name : "${substr("${local.rancher_subdomain}-${local.name_suffix}", 0, local.name_max_length)}"
   roles_per_pool = [
     {
-      "quantity"      = 1
+      "quantity"      = 3
       "etcd"          = true
       "control-plane" = true
       "worker"        = true
@@ -37,13 +37,31 @@ locals {
       v = "3"
     }
   } : null
-  # rke1_kube_config = rancher2_cluster_sync.rke1.kube_config
-  # rke2_kube_config = rancher2_cluster_sync.rke2.kube_config
+  k3s_instances = { for i, node in aws_instance.k3s[*] :
+    i => {
+      ami        = node.ami
+      arn        = node.arn
+      private_ip = node.private_ip
+      public_ip  = node.public_ip
+    }
+  }
+  leader_instance = local.k3s_instances["0"]
+  server_instances = {
+    1 = local.k3s_instances["1"]
+    2 = local.k3s_instances["2"]
+  }
+  k3s_cluster_secret = length(var.k3s_cluster_secret) > 0 ? var.k3s_cluster_secret : random_password.k3s_cluster_secret.result
+  leader_commands = [
+    "sudo /tmp/k3s-install.sh",
+    "${rancher2_cluster.k3s.cluster_registration_token[0].command}"
+  ]
+  server_commands = ["sudo /tmp/k3s-install.sh"]
+  leader_install  = "curl -sfL https://get.k3s.io | K3S_TOKEN=${local.k3s_cluster_secret} sh -s - server --cluster-init --write-kubeconfig-mode=0644"
+  server_install  = "curl -sfL https://get.k3s.io | K3S_TOKEN=${local.k3s_cluster_secret} sh -s - server --server https:${local.k3s_instances["0"].public_ip}:6443 --write-kubeconfig-mode=0644"
+
   k3s_kube_config = rancher2_cluster_sync.k3s.kube_config
-  # cluster_names    = [module.rke1.name, rancher2_cluster_v2.rke2.name, rancher2_cluster_v2.k3s.name]
-  # clusters         = [module.rke1, rancher2_cluster_v2.rke2, rancher2_cluster_v2.k3s]
-  clusters      = [rancher2_cluster.k3s]
-  cluster_names = [rancher2_cluster.k3s.name]
+  clusters        = [rancher2_cluster.k3s]
+  cluster_names   = [rancher2_cluster.k3s.name]
   clusters_info = {
     for i, cluster in local.clusters :
     i => {
@@ -54,45 +72,11 @@ locals {
   }
 }
 
-resource "aws_instance" "this" {
-  ebs_optimized   = true
-  instance_type   = var.server_instance_type
-  ami             = data.aws_ami.ubuntu.id
-  security_groups = var.security_groups
-  user_data = templatefile("${path.module}/files/server_userdata.tmpl",
-    {
-      cluster_count         = 1,
-      k3s_cluster_secret    = var.k3s_cluster_secret,
-      install_k3s_image     = var.k3s_version,
-      k3d_version           = var.k3d_version,
-      k3s_server_args       = var.k3s_server_args,
-      registration_commands = rancher2_cluster.k3s[*].cluster_registration_token[0].command,
-      ssh_keys              = var.ssh_keys
-    }
-  )
-
-  tags = {
-    Name           = "${local.cluster_name}-k3s"
-    RancherScaling = local.cluster_name
-    Owner          = data.aws_caller_identity.current.user_id
-    DoNotDelete    = "true"
-  }
-
-  root_block_device {
-    volume_size = var.volume_size
-    volume_type = var.volume_type
-  }
-
-  depends_on = [rancher2_cluster.k3s]
-}
-
 resource "rancher2_project" "this" {
   for_each   = local.clusters_info
   cluster_id = each.value.id
   name       = each.value.project
   depends_on = [
-    # rancher2_cluster_sync.rke1,
-    # rancher2_cluster_sync.rke2,
     rancher2_cluster_sync.k3s
   ]
 }
@@ -118,8 +102,6 @@ module "bulk_components" {
   user_password        = var.user_password
 
   depends_on = [
-    # rancher2_cluster_sync.rke1,
-    # rancher2_cluster_sync.rke2,
     rancher2_cluster_sync.k3s,
     rancher2_project.this
   ]

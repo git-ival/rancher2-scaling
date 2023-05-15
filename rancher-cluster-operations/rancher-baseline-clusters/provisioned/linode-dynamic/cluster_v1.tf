@@ -6,7 +6,7 @@ module "node_template" {
   }
 
   create_new             = var.create_node_reqs
-  name                   = "${each.value.name}${each.key}-nt"
+  name                   = length(var.node_template_name) > 0 ? var.node_template_name : "${each.value.name}${each.key}-nt"
   cloud_cred_id          = module.cloud_credential.id
   install_docker_version = var.install_docker_version
   cloud_provider         = "linode"
@@ -42,15 +42,16 @@ module "cluster_v1" {
     rancher2 = rancher2
   }
 
-  name               = each.value.name
-  description        = "TF linode nodedriver cluster ${each.value.name}"
-  k8s_distribution   = each.value.k8s_distribution
-  k8s_version        = each.value.k8s_version
-  network_config     = local.network_config
-  upgrade_strategy   = local.upgrade_strategy
-  kube_api           = local.kube_api
-  agent_env_vars     = var.agent_env_vars
-  enable_cri_dockerd = var.enable_cri_dockerd
+  name                                                       = each.value.name
+  description                                                = "TF linode nodedriver cluster ${each.value.name}"
+  k8s_distribution                                           = each.value.k8s_distribution
+  k8s_version                                                = each.value.k8s_version
+  network_config                                             = local.network_config
+  upgrade_strategy                                           = local.upgrade_strategy
+  kube_api                                                   = local.kube_api
+  agent_env_vars                                             = var.agent_env_vars
+  enable_cri_dockerd                                         = var.enable_cri_dockerd
+  default_pod_security_admission_configuration_template_name = each.value.psa_config
 
   depends_on = [
     module.node_template

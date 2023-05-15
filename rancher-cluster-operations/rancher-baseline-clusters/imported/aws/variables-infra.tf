@@ -10,6 +10,12 @@ variable "security_groups" {
   description = "A list of security group names (EC2-Classic) or IDs (default VPC) to associate with"
 }
 
+variable "node_count" {
+  type        = number
+  default     = 3
+  description = "The number of nodes to create for the cluster"
+}
+
 variable "server_instance_type" {
   type        = string
   description = "Cloud provider-specific instance type string to use for rke1 server"
@@ -44,20 +50,14 @@ variable "install_docker_version" {
   description = "The version of docker to install. Available docker versions can be found at: https://github.com/rancher/install-docker"
 }
 
-variable "k3d_version" {
-  type        = string
-  default     = "v5.4.9"
-  description = "k3d version to use during cluster create (release tag with the 'v')"
-}
-
-variable "k3s_server_args" {
-  type        = string
-  default     = ""
-  description = "extra args to pass to k3s server"
-}
-
 variable "k3s_cluster_secret" {
   type        = string
   default     = ""
   description = "k3s cluster secret"
+}
+
+variable "k3s_datastore_cafile" {
+  default     = "/srv/rds-combined-ca-bundle.pem"
+  type        = string
+  description = "Location to download RDS CA Bundle"
 }

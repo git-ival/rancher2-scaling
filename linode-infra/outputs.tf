@@ -21,3 +21,7 @@ output "lb_ipv4" {
 output "lb_ipv6" {
   value = var.nlb ? module.rancher_nodebalancer[0].ipv6 : null
 }
+
+output "os_user" {
+  value = "root"
+}

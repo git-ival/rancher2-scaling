@@ -10,22 +10,10 @@ variable "install_k8s_version" {
   description = "Version of K8s to install"
 }
 
-variable "system_images" {
-  type        = map(any)
-  default     = {}
-  description = "A map specifying override values matching the keys at https://github.com/rancher/kontainer-driver-metadata"
-}
-
 variable "install_rancher" {
   type        = bool
   default     = true
   description = "Boolean that defines whether or not to install Rancher"
-}
-
-variable "enable_cri_dockerd" {
-  type        = bool
-  default     = true
-  description = "(Optional) Boolean that determines if CRI dockerd is enabled for the kubelet (required for k8s >= v1.24.x)"
 }
 
 variable "rancher_version" {
@@ -58,7 +46,7 @@ variable "rancher_password" {
 
 variable "rancher_chart" {
   type        = string
-  default     = "stable"
+  default     = "latest"
   description = "Helm chart to use for Rancher install"
 }
 
@@ -110,18 +98,6 @@ variable "sensitive_token" {
   description = "Boolean that determines if the module should treat the generated Rancher Admin API Token as sensitive in the output."
 }
 
-variable "enable_secrets_encryption" {
-  type        = bool
-  default     = false
-  description = "(Optional) Boolean that determines if secrets-encryption should be enabled"
-}
-
-variable "enable_audit_log" {
-  type        = bool
-  default     = false
-  description = "(Optional) Boolean that determines if secrets-encryption should be enabled"
-}
-
 variable "rancher_settings" {
   type = list(object({
     name        = string
@@ -131,12 +107,6 @@ variable "rancher_settings" {
   }))
   default     = []
   description = "A list of objects defining modifications to the named rancher settings"
-}
-
-variable "rke_metadata_url" {
-  type    = string
-  default = ""
-
 }
 
 variable "rancher_env_vars" {

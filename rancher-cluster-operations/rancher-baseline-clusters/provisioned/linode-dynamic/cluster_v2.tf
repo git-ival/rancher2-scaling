@@ -11,10 +11,11 @@ resource "rancher2_machine_config_v2" "this" {
 }
 
 resource "rancher2_cluster_v2" "cluster_v2" {
-  for_each                     = local.v2_configs
-  name                         = each.value.name
-  kubernetes_version           = each.value.k8s_version
-  cloud_credential_secret_name = module.cloud_credential.id
+  for_each                                                   = local.v2_configs
+  name                                                       = each.value.name
+  kubernetes_version                                         = each.value.k8s_version
+  cloud_credential_secret_name                               = module.cloud_credential.id
+  default_pod_security_admission_configuration_template_name = each.value.psa_config
   dynamic "agent_env_vars" {
     for_each = var.agent_env_vars == null ? [] : var.agent_env_vars
     iterator = agent_var

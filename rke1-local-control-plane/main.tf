@@ -131,6 +131,8 @@ resource "local_file" "cluster_yml" {
     dedicated_monitoring      = local.install_monitoring,
     monitor_address           = local.monitor_address,
     monitor_private_address   = local.monitor_private_address,
+    psa_config                = var.psa_config,
+    psa_file                  = var.psa_file,
     enable_secrets_encryption = var.enable_secrets_encryption,
     enable_audit_log          = var.enable_audit_log,
     ssh_key_path              = var.ssh_key_path,
@@ -188,6 +190,7 @@ module "install_common" {
   rancher_version     = var.rancher_version
   certmanager_version = var.certmanager_version
 
+  helm_rancher_repo              = "https://releases.rancher.com/server-charts/${var.rancher_chart}"
   helm_rancher_chart_values_path = "${path.module}/files/values/rancher_chart_values.tftpl"
   letsencrypt_email              = var.letsencrypt_email
   rancher_image                  = var.rancher_image

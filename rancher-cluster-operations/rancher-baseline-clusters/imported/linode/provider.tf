@@ -7,7 +7,7 @@ terraform {
     }
     rancher2 = {
       source  = "rancher/rancher2"
-      version = ">= 2.0.0, <= 3.0.0"
+      version = ">= 2.0.0, <= 4.0.0"
     }
   }
   backend "local" {

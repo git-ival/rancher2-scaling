@@ -52,3 +52,30 @@ data "aws_ami" "ubuntu" {
     values = ["x86_64"]
   }
 }
+
+resource "random_password" "k3s_cluster_secret" {
+  length  = 30
+  special = false
+}
+
+data "cloudinit_config" "k3s" {
+  gzip          = false
+  base64_encode = true
+
+  # Main cloud-config configuration file.
+  part {
+    filename     = "00_cloud-config-base.yaml"
+    content_type = "text/cloud-config"
+    content = templatefile("../../../../control-plane/modules/aws-infra/files/cloud-config-base.tmpl", {
+      ssh_keys = var.ssh_keys,
+      }
+    )
+  }
+
+  part {
+    filename     = "02_k8s-setup.sh"
+    content_type = "text/x-shellscript"
+    content      = file("../../../../control-plane/modules/aws-infra/files/k8s-setup.sh")
+    merge_type   = "list(append)+dict(recurse_array)+str()"
+  }
+}

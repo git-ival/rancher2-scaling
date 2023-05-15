@@ -17,8 +17,10 @@ resource "rancher2_machine_config_v2" "this" {
 }
 
 resource "rancher2_cluster_v2" "rke2" {
-  name               = "${local.cluster_name}-rke2"
-  kubernetes_version = var.rke2_version
+  name                                                       = "${local.cluster_name}-rke2"
+  kubernetes_version                                         = var.rke2_version
+  cloud_credential_secret_name                               = module.cloud_credential.id
+  default_pod_security_admission_configuration_template_name = "rancher-privileged"
   dynamic "agent_env_vars" {
     for_each = var.agent_env_vars == null ? [] : var.agent_env_vars
     iterator = agent_var
@@ -55,8 +57,10 @@ resource "rancher2_cluster_v2" "rke2" {
 }
 
 resource "rancher2_cluster_v2" "k3s" {
-  name               = "${local.cluster_name}-k3s"
-  kubernetes_version = var.k3s_version
+  name                                                       = "${local.cluster_name}-k3s"
+  kubernetes_version                                         = var.k3s_version
+  cloud_credential_secret_name                               = module.cloud_credential.id
+  default_pod_security_admission_configuration_template_name = "rancher-privileged"
   dynamic "agent_env_vars" {
     for_each = var.agent_env_vars == null ? [] : var.agent_env_vars
     iterator = agent_var

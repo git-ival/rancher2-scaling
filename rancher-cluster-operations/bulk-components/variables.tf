@@ -38,12 +38,14 @@ variable "cluster_name" {
 variable "project" {
   type        = string
   default     = "Default"
+  nullable    = false
   description = "Name of rancher2_project to operate on. Not used for the creation of projects"
 }
 
 variable "namespace" {
   type        = string
   default     = "default"
+  nullable    = false
   description = "Name of rancher2_namespace to operate on. Not used for the creation of namespaces"
 }
 

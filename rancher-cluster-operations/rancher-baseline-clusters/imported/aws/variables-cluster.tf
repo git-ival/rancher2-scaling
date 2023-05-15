@@ -10,20 +10,6 @@ variable "cluster_labels" {
   description = "(Optional) Labels to add to each provisioned cluster"
 }
 
-variable "rke1_version" {
-  validation {
-    condition     = can(regex("v", var.rke1_version))
-    error_message = "The version number must be prefixed with 'v'."
-  }
-}
-
-variable "rke2_version" {
-  validation {
-    condition     = can(regex("v", var.rke2_version))
-    error_message = "The version number must be prefixed with 'v'."
-  }
-}
-
 variable "k3s_version" {
   validation {
     condition     = can(regex("v", var.k3s_version))

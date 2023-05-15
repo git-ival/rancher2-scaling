@@ -27,6 +27,13 @@ services:
     retention: 24h
     creation: 6h
   kube-api:
+%{ if length(psa_config) > 0 ~}
+    pod_security_configuration: ${psa_config}
+%{ endif ~}
+%{ if length(psa_file) > 0 ~}
+    admission_configuration:
+      ${file(psa_file)}
+%{ endif ~}
     secrets_encryption_config:
       enabled: ${enable_secrets_encryption}
     audit_log:

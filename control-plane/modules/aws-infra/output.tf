@@ -13,3 +13,7 @@ output "nodes_private_ips" {
 output "nodes_public_ips" {
   value = data.aws_instances.nodes.public_ips
 }
+
+output "os_user" {
+  value = var.server_instance_ssh_user
+}

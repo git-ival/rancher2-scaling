@@ -78,3 +78,12 @@ Python for scaling tests
         }
 
         ```
+
+### Upgrading Provider Versions
+As new versions of providers are released it may be necessary to upgrade module provider dependencies, conversely it might be necessary to lock providers to a specific version for a given module. In order to facilitate this, version constraints should be placed on each module's providers as needed.
+
+Additionally, versions should only be explicitly upgraded when the changes have been reviewed and any necessary module compatibility changes have been made to support the new provider versions.
+
+In order to upgrade provider versions, you should first modify the version constraint for a given provider to include the new version you wish to use. Then proceed to run the following command on the module: `terraform init -upgrade`, this command will upgrade all providers to the latest version that is consistent with the version constraints specified.
+
+After upgrading provider versions you should run a provider lock with explicit platform support to ensure other developers will be able to make use of the exact versions that were upgraded. Here is an example: `terraform providers lock -platform=linux_amd64 -platform=darwin_amd64 -platform=windows_amd64 -platform=linux_arm64 -platform=darwin_arm64`, this bundles the provider checksums for linux, darwin and windows on `amd64` and linux and darwin on `arm64`.

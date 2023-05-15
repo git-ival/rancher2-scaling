@@ -12,6 +12,7 @@ resource "rancher2_cluster" "this" {
   description = try(var.description, null)
   labels      = try(var.labels, null)
   annotations = try(var.annotations, null)
+  default_pod_security_admission_configuration_template_name = try(var.default_pod_security_admission_configuration_template_name, null)
   dynamic "agent_env_vars" {
     for_each = var.agent_env_vars != null ? var.agent_env_vars : []
     iterator = env_var
@@ -76,8 +77,24 @@ resource "rancher2_cluster" "this" {
           for_each = var.kube_api != null ? [var.kube_api] : []
           iterator = item
           content {
-            admission_configuration = try(item.value.admission_configuration, null)
-            always_pull_images      = try(item.value.always_pull_images, null)
+            dynamic "admission_configuration" {
+              for_each = item.value.admission_configuration != null ? [item.value.admission_configuration] : []
+              iterator = config
+              content {
+                api_version = try(config.value.api_version, null)
+                kind        = try(config.value.kind, null)
+                dynamic "plugins" {
+                  for_each = config.value.plugins != null ? config.value.plugins : []
+                  iterator = plugin
+                  content {
+                    name          = try(plugin.value.name, null)
+                    path          = try(plugin.value.path, null)
+                    configuration = try(plugin.value.configuration, null)
+                  }
+                }
+              }
+            }
+            always_pull_images = try(item.value.always_pull_images, null)
             # audit_log {
             #   enabled       = try(item.value.audit_log.enabled, null)
             #   configuration = try(item.value.audit_log.configuration, null)
