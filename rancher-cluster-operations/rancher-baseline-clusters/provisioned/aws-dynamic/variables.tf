@@ -106,7 +106,7 @@ variable "cluster_configs" {
   type = list(object({
     k8s_version      = string
     k8s_distribution = string
-    name             = optional(string)
+    name             = optional(string, "")
     psa_config       = optional(string)
     roles_per_pool = optional(list(map(string)), [
       {

@@ -8,10 +8,10 @@ terraform {
 }
 
 resource "rancher2_cluster" "this" {
-  name        = var.name
-  description = try(var.description, null)
-  labels      = try(var.labels, null)
-  annotations = try(var.annotations, null)
+  name                                                       = var.name
+  description                                                = try(var.description, null)
+  labels                                                     = try(var.labels, null)
+  annotations                                                = try(var.annotations, null)
   default_pod_security_admission_configuration_template_name = try(var.default_pod_security_admission_configuration_template_name, null)
   dynamic "agent_env_vars" {
     for_each = var.agent_env_vars != null ? var.agent_env_vars : []
@@ -78,7 +78,7 @@ resource "rancher2_cluster" "this" {
           iterator = item
           content {
             dynamic "admission_configuration" {
-              for_each = item.value.admission_configuration != null ? [item.value.admission_configuration] : []
+              for_each = try(item.value.admission_configuration != null, false) ? [item.value.admission_configuration] : []
               iterator = config
               content {
                 api_version = try(config.value.api_version, null)
