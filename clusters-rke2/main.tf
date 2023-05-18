@@ -105,9 +105,10 @@ resource "rancher2_machine_config_v2" "aws" {
 }
 
 resource "rancher2_cluster_v2" "rke2" {
-  name               = local.cluster_name
-  labels             = var.cluster_labels
-  kubernetes_version = var.k8s_version
+  name                                                       = local.cluster_name
+  labels                                                     = var.cluster_labels
+  kubernetes_version                                         = var.k8s_version
+  default_pod_security_admission_configuration_template_name = each.value.psa_config
 
   rke_config {
     dynamic "machine_pools" {

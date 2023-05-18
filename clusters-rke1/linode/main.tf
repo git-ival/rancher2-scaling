@@ -94,9 +94,10 @@ module "cluster_v1" {
   network_config   = local.network_config
   upgrade_strategy = local.upgrade_strategy
 
-  kube_api           = local.kube_api
-  agent_env_vars     = var.agent_env_vars
-  enable_cri_dockerd = var.enable_cri_dockerd
+  kube_api                                                   = local.kube_api
+  agent_env_vars                                             = var.agent_env_vars
+  enable_cri_dockerd                                         = var.enable_cri_dockerd
+  default_pod_security_admission_configuration_template_name = var.psa_config
 
   depends_on = [
     module.node_template
@@ -113,6 +114,26 @@ resource "local_file" "kube_config" {
   content         = var.wait_for_active ? nonsensitive(rancher2_cluster_sync.this[0].kube_config) : module.cluster_v1.kube_config
   filename        = "${path.module}/files/kube_config/${terraform.workspace}_kube_config"
   file_permission = "0700"
+}
+
+module "rancher_monitoring" {
+  count  = var.install_monitoring && var.wait_for_active ? 1 : 0
+  source = "../../rancher-cluster-operations/charts/rancher-monitoring"
+  providers = {
+    rancher2 = rancher2
+  }
+
+  use_v2        = true
+  rancher_url   = var.rancher_api_url
+  rancher_token = var.rancher_token_key
+  charts_branch = var.rancher_charts_branch
+  chart_version = var.monitoring_version
+  cluster_id    = module.cluster_v1.id
+  project_id    = module.cluster_v1.default_project_id
+
+  depends_on = [
+    local_file.kube_config
+  ]
 }
 
 output "create_node_reqs" {

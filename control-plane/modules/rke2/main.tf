@@ -27,27 +27,31 @@ locals {
 
 ## Provision LB, and Auto Scaling Groups of server nodes
 module "aws_infra_rke2" {
-  source = "git::https://github.com/git-ival/rke2-aws-tf.git//?ref=update-to-upstream"
+  source = "git::https://github.com/git-ival/rke2-aws-tf.git//?ref=dev"
+  # source = "../../../../rke2-aws-tf/"
 
-  cluster_name             = var.name
-  fqdn                     = aws_route53_record.public.fqdn
-  controlplane_internal    = var.internal_lb
-  unique_suffix            = false
-  vpc_id                   = var.vpc_id
-  subnets                  = var.subnets
-  ami                      = var.ami != null ? var.ami : data.aws_ami.ubuntu.id
-  extra_security_group_ids = [aws_security_group.ingress_egress.id, aws_security_group.rancher.id]
-  extra_target_group_arns  = [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn]
-  tags                     = local.tags
-  servers                  = var.server_node_count
-  instance_type            = var.server_instance_type
-  iam_instance_profile     = var.iam_instance_profile
-  ssh_authorized_keys      = var.ssh_keys
-  rke2_version             = var.rke2_version
-  rke2_channel             = var.rke2_channel
-  rke2_config              = var.rke2_config
-  pre_userdata             = "apt update && apt upgrade"
-  post_userdata            = <<-EOT
+  cluster_name                                     = var.name
+  fqdn                                             = aws_route53_record.public.fqdn
+  controlplane_internal                            = var.internal_lb
+  unique_suffix                                    = false
+  vpc_id                                           = var.vpc_id
+  subnets                                          = var.subnets
+  ami                                              = var.ami != null ? var.ami : data.aws_ami.ubuntu.id
+  extra_security_group_ids                         = [aws_security_group.ingress_egress.id, aws_security_group.rancher.id]
+  extra_target_group_arns                          = [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn]
+  associate_public_ip_address                      = true
+  statestore_attach_deny_insecure_transport_policy = false
+  metadata_options                                 = {}
+  tags                                             = local.tags
+  servers                                          = var.server_node_count
+  instance_type                                    = var.server_instance_type
+  iam_instance_profile                             = var.iam_instance_profile
+  ssh_authorized_keys                              = var.ssh_keys
+  rke2_version                                     = var.rke2_version
+  rke2_channel                                     = var.rke2_channel
+  rke2_config                                      = var.rke2_config
+  pre_userdata                                     = "apt update && apt upgrade"
+  post_userdata                                    = <<-EOT
     cat <<-EOF > /var/lib/rancher/rke2/server/manifests/rke2-ingress-nginx.yaml
     apiVersion: helm.cattle.io/v1
     kind: HelmChartConfig
@@ -66,23 +70,26 @@ module "aws_infra_rke2" {
 
 ## Provision Auto Scaling Group of agent to auto-join cluster with taints and labels for monitoring only
 module "rke2_monitor_pool" {
-  count  = var.setup_monitoring_agent ? 1 : 0
-  source = "git::https://github.com/git-ival/rke2-aws-tf.git//modules/agent-nodepool?ref=update-to-upstream"
+  count = var.setup_monitoring_agent ? 1 : 0
+  source = "git::https://github.com/git-ival/rke2-aws-tf.git//modules/agent-nodepool?ref=dev"
+  # source = "../../../../rke2-aws-tf/modules/agent-nodepool/"
 
-  name                     = "monitoring"
-  vpc_id                   = var.vpc_id
-  subnets                  = var.subnets
-  ami                      = var.ami != null ? var.ami : data.aws_ami.ubuntu.id
-  instance_type            = var.server_instance_type
-  tags                     = local.tags
-  extra_security_group_ids = [aws_security_group.ingress_egress.id, aws_security_group.rancher.id]
-  extra_target_group_arns  = [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn]
-  iam_instance_profile     = var.iam_instance_profile
-  ssh_authorized_keys      = var.ssh_keys
-  asg                      = { min : 1, max : 1, desired : 1 }
-  rke2_version             = var.rke2_version # https://docs.rke2.io/install/install_options/install_options/#configuring-the-linux-installation-script
-  rke2_channel             = var.rke2_channel
-  rke2_config              = <<-EOT
+  name                        = "monitoring"
+  vpc_id                      = var.vpc_id
+  subnets                     = var.subnets
+  ami                         = var.ami != null ? var.ami : data.aws_ami.ubuntu.id
+  instance_type               = var.server_instance_type
+  tags                        = local.tags
+  extra_security_group_ids    = [aws_security_group.ingress_egress.id, aws_security_group.rancher.id]
+  extra_target_group_arns     = [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn]
+  associate_public_ip_address = true
+  metadata_options            = {}
+  iam_instance_profile        = var.iam_instance_profile
+  ssh_authorized_keys         = var.ssh_keys
+  asg                         = { min : 1, max : 1, desired : 1 }
+  rke2_version                = var.rke2_version # https://docs.rke2.io/install/install_options/install_options/#configuring-the-linux-installation-script
+  rke2_channel                = var.rke2_channel
+  rke2_config                 = <<-EOT
     node-taint: monitoring=yes:NoSchedule
     node-label: monitoring=yes
     EOT

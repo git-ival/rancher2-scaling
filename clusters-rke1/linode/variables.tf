@@ -142,6 +142,12 @@ variable "install_docker_version" {
   description = "The version of docker to install. Available docker versions can be found at: https://github.com/rancher/install-docker"
 }
 
+variable "install_monitoring" {
+  type        = bool
+  default     = false
+  description = "Boolean that defines whether or not to install rancher-monitoring"
+}
+
 variable "server_instance_type" {
   type        = string
   description = "Cloud provider-specific instance type string to use for rke1 server"
@@ -189,5 +195,16 @@ variable "wait_for_active" {
 
 variable "auto_replace_timeout" {
   type        = number
+  default     = null
   description = "Time to wait after Cluster becomes Active before deleting nodes that are unreachable"
+}
+
+variable "psa_config" {
+  type        = string
+  default     = null
+  description = "The default PSACT name to set on each cluster"
+  validation {
+    condition     = var.psa_config == null ? true : length(var.psa_config) > 0 || contains([null, "", "rancher-privileged", "rancher-restricted"], var.psa_config)
+    error_message = "var.psa_config must be one of [null, '','rancher-privileged', 'rancher-restricted'] OR the name of an existing PSACT."
+  }
 }

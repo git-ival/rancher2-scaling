@@ -5,7 +5,11 @@ provider "registry.terraform.io/hashicorp/aws" {
   version     = "4.66.1"
   constraints = ">= 4.63.0, <= 5.0.0"
   hashes = [
+    "h1:7GytS2hRFKZDR1GgcS/nNQlyAjaMelF09HJ5xFFWneM=",
+    "h1:AqQpXqwPd3bejoduTzc82UhMCzwirWE9I8hUOLsJDXY=",
     "h1:D/qzK7fE3pgdg25W1u5GqI+VILy8UmhzXruz6c8rJ7g=",
+    "h1:FOTvzcx3rtvoG6vkHGDf5gv4V+cfksrzhVl8dQzX4Dw=",
+    "h1:oi2xfTwb5ZgjA1OluE4KThAQF4+1kN0yNbUu5053rsA=",
     "zh:001c707174b7d6bf89a96cf806f925bb852d1a285fb80b81222cbeb4743bcb79",
     "zh:19bc6ac0a7fd1c564fd56c536f1743f71a5e7ca724e21ea51a6a79218939733d",
     "zh:3dac5c27f40b511239e9fe6f97dc0b6c95f630ba328001820ddc764e766a5ca2",
@@ -98,7 +102,11 @@ provider "registry.terraform.io/loafoe/ssh" {
   version     = "2.6.0"
   constraints = ">= 2.6.0, <= 3.0.0"
   hashes = [
+    "h1:4lHZGkQUeXzUsiiR48ot+S9vx6G+tj3t1tNiuYiQaOk=",
     "h1:80FIBNQBLj9p0j7EMQDWxzY6Fh0VODiflCww1/Wx6rk=",
+    "h1:Yjq/IVrZG0k3LtOHLE9gr2QGxDnuO5tXIxBeuZ0Uo7o=",
+    "h1:c0rApOgtI/5Vtl8BM2Xbz+ITYQlfpScSnTNE+vLLf1g=",
+    "h1:t88ktB3g9wVugCTkyg17AMJ38i+nz7FwotwiDbon/GU=",
     "zh:1285448b69bd388a4a59ed170f9c07c641207a7291057860557937807d02da95",
     "zh:2472c5dee4265cb555a627aa4ecc5702d32cd7aebe85722820df7499b7d4502a",
     "zh:2a9b8f0ad446febb517a7fe38de9b02bc1bcceb90843a713c546770eff44aa84",
@@ -115,9 +123,13 @@ provider "registry.terraform.io/loafoe/ssh" {
 
 provider "registry.terraform.io/rancher/rancher2" {
   version     = "3.0.0"
-  constraints = ">= 1.10.0, >= 1.13.0, >= 2.0.0, <= 3.0.0"
+  constraints = ">= 1.10.0, >= 1.13.0, >= 2.0.0, <= 4.0.0"
   hashes = [
+    "h1:6+X0/1J9uktvaQDCp72OOlimzBvv8CKv0bIcMZYdeIU=",
+    "h1:PdYi5E2j8AB1YYXfOaVLZtVeJJ47fI3GTVWrCEtCWPA=",
     "h1:Qnc86BDThHGg+UqfK8Ssx7l+KcYg8wBDsMU3mCgUK6E=",
+    "h1:g+JrXyXLztfVMzCvK9FrR+KMDDK0QmpTpBsMQrF8x8A=",
+    "h1:jbCdH8VVeSEyzCO2ZuaR7pDCdGduZ8bCpjg7HW1r6UI=",
     "zh:3f28e165f4e6dbfb3c6f57ea96571f907915cf9d3eaf0041054ec3c4e22cc14b",
     "zh:4d71e727690d8691321c9591248599fdb38e09e27dace74da6dee16ec01351b0",
     "zh:51dc86277205c7514cad0edd6e48a300a470a846a12927323b09fb1550891bcb",

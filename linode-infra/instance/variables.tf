@@ -94,7 +94,7 @@ variable "interface" {
 }
 
 variable "disks" {
-  type = list(map({
+  type = list(object({
     label      = string
     size       = number
     id         = string

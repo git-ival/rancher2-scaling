@@ -14,12 +14,12 @@ variable "size" {
 }
 
 variable "authorized_keys" {
-  type        = optional(list(string))
+  type        = list(string)
   description = "(Optional) A list of public SSH keys that will be automatically appended to the root user’s ~/.ssh/authorized_keys file when deploying from an Image."
 }
 
 variable "authorized_users" {
-  type        = optional(list(string))
+  type        = list(string)
   description = "(Optional) A list of usernames. If the usernames have associated SSH keys, the keys will be appended to the root user’s ~/.ssh/authorized_keys file."
 }
 

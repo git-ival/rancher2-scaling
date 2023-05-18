@@ -126,9 +126,10 @@ module "cluster_v1" {
   upgrade_strategy = {
     drain = false
   }
-  kube_api           = local.kube_api
-  agent_env_vars     = var.agent_env_vars
-  enable_cri_dockerd = var.enable_cri_dockerd
+  kube_api                                                   = local.kube_api
+  agent_env_vars                                             = var.agent_env_vars
+  enable_cri_dockerd                                         = var.enable_cri_dockerd
+  default_pod_security_admission_configuration_template_name = var.psa_config
 
   depends_on = [
     module.node_template

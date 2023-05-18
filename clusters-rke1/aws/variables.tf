@@ -220,3 +220,13 @@ variable "auto_replace_timeout" {
   type        = number
   description = "Time to wait after Cluster becomes Active before deleting nodes that are unreachable"
 }
+
+variable "psa_config" {
+  type        = string
+  default     = null
+  description = "The default PSACT name to set on each cluster"
+  validation {
+    condition     = var.psa_config == null ? true : length(var.psa_config) > 0 || contains([null, "", "rancher-privileged", "rancher-restricted"], var.psa_config)
+    error_message = "var.psa_config must be one of [null, '','rancher-privileged', 'rancher-restricted'] OR the name of an existing PSACT."
+  }
+}
