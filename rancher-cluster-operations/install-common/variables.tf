@@ -34,6 +34,12 @@ variable "helm_rancher_chart_values_path" {
   description = "Local path to the templated values.yaml to be used for the Rancher Server Helm install"
 }
 
+variable "rancher_debug_flag" {
+  type        = bool
+  default     = false
+  description = "A boolean flag for enabling/disabling debugging on the Rancher server"
+}
+
 variable "rancher_env_vars" {
   type = list(object({
     name  = string

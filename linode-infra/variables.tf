@@ -49,14 +49,14 @@ variable "label" {
 
 variable "image" {
   type        = string
-  default     = "linode/ubuntu18.04"
+  default     = "linode/ubuntu20.04"
   description = "Linode image ID to deploy all of the linode Disk(s) from."
   nullable    = false
 }
 
 variable "region" {
   type        = string
-  default     = "us-east"
+  default     = "us-west"
   description = "Region the linode(s) are deployed."
   nullable    = false
 }

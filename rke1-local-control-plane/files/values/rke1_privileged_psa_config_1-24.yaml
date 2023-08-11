@@ -1,0 +1,12 @@
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+- configuration:
+    apiVersion: pod-security.admission.config.k8s.io/v1alpha1
+    defaults:
+      enforce: privileged
+      enforce-version: latest
+    exemptions: {}
+    kind: PodSecurityConfiguration
+  name: PodSecurity
+  path: ""

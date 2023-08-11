@@ -15,10 +15,10 @@ terraform {
   }
 }
 
-provider "aws" {
-  region     = var.region
-  access_key = var.aws_access_key
-  secret_key = var.aws_secret_key
+provider "linode" {
+  # config_path    = var.linode_config_path
+  # config_profile = var.linode_config_profile
+  token = var.linode_token
 }
 
 provider "rancher2" {

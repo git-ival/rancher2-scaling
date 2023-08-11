@@ -1,11 +1,11 @@
 locals {
   name_max_length   = 32
-  firewall_name     = var.label != null ? substr(var.label, 0, local.name_max_length) : substr("${local.name}-rancher-firewall", 0, local.name_max_length)
   rancher_subdomain = split(".", split("//", "${var.rancher_api_url}")[1])[0]
-  name_suffix       = length(var.name_suffix) > 0 ? var.name_suffix : "${terraform.workspace}"
   cluster_name      = length(var.cluster_name) > 0 ? var.cluster_name : "${substr("${local.rancher_subdomain}-${local.name_suffix}", 0, local.name_max_length)}"
-  group             = try(length(var.group) > 0 ? var.group : local.name)
-  nodebalancer_name = try(var.label != null, false) ? substr(var.label, 0, local.name_max_length) : substr(local.name, 0, local.name_max_length)
+  firewall_name     = substr("${local.cluster_name}-rancher-firewall", 0, local.name_max_length)
+  name_suffix       = length(var.name_suffix) > 0 ? var.name_suffix : "${terraform.workspace}"
+  group             = try(length(var.linode_group) > 0 ? var.linode_group : local.cluster_name)
+  nodebalancer_name = substr(local.cluster_name, 0, local.name_max_length)
   rancher_inbound_rules = [
     {
       label    = "allow-https"
@@ -163,24 +163,25 @@ locals {
     }
   ]
   final_rules = concat(local.rancher_inbound_rules, local.cluster_inbound_rules)
+  tags        = length(var.tags) > 0 ? var.tags : ["RancherScaling:${local.rancher_subdomain}", "Owner:${local.rancher_subdomain}"]
 }
 
 resource "linode_instance" "this" {
   count = var.node_count
 
-  label            = try(var.label != null, false) ? substr(var.label, 0, local.name_max_length) : substr("${local.name}-${count.index}", 0, local.name_max_length)
+  label            = substr("${local.cluster_name}-${count.index}", 0, local.name_max_length)
   image            = var.image
   region           = var.region
-  type             = var.instance_type
-  authorized_keys  = var.authorized_keys
-  authorized_users = var.authorized_users
+  type             = var.node_type
+  authorized_keys  = var.linode_keys
+  authorized_users = var.linode_users
   root_pass        = var.root_pass
 
   group       = local.group
-  tags        = concat(var.tags, [local.name])
-  swap_size   = var.swap_size
-  private_ip  = var.private_ip
-  shared_ipv4 = var.shared_ipv4
+  tags        = concat(local.tags, [local.cluster_name])
+  swap_size   = null
+  private_ip  = true
+  shared_ipv4 = null
 
   ### disable alerts
   alerts {
@@ -195,7 +196,7 @@ resource "linode_instance" "this" {
 }
 
 module "rancher_firewall" {
-  source = "./firewall"
+  source = "../../../../linode-infra/firewall"
   providers = {
     linode = linode
   }
@@ -206,5 +207,5 @@ module "rancher_firewall" {
   outbound_rules  = []
   outbound_policy = "ACCEPT"
   linodes         = linode_instance.this[*].id
-  tags            = concat(var.tags, [local.name])
+  tags            = concat(local.tags, [local.cluster_name])
 }

@@ -73,6 +73,29 @@ variable "rancher_token_key" {
   description = "rancher server API token"
 }
 
+variable "install_monitoring" {
+  type        = bool
+  default     = false
+  description = "Flag used to determine if rancher-monitoring should be installed"
+}
+
+variable "use_monitoring_taint" {
+  default     = false
+  type        = bool
+  description = "Boolean that will switch the values file to one that will limit the deployment to nodes tainted with 'monitoring = yes'"
+}
+
+variable "rancher_charts_branch" {
+  type        = string
+  default     = "release-v2.7"
+  description = "The github branch for the desired Rancher chart version"
+}
+
+variable "monitoring_version" {
+  type        = string
+  default     = ""
+  description = "Version of Monitoring v2 to install - Do not include the v prefix."
+}
 variable "insecure_flag" {
   type        = bool
   default     = false
@@ -84,8 +107,16 @@ variable "cluster_configs" {
     k8s_version      = string
     k8s_distribution = string
     name             = optional(string, "")
+    count            = optional(number, 1)
     psa_config       = optional(string)
-    roles_per_pool = optional(list(map(string)), [
+    roles_per_pool = optional(list(object({
+      quantity      = number
+      etcd          = bool
+      control-plane = bool
+      worker        = bool
+      labels        = optional(map(string), {})
+      taints        = optional(list(map(string)), [])
+      })), [
       {
         "quantity"      = 3
         "etcd"          = true
@@ -127,15 +158,15 @@ variable "cluster_configs" {
     error_message = "Each version number must be prefixed with 'v'."
   }
   validation {
-    condition     = alltrue([for config in var.cluster_configs : contains([1, 3, 5], sum([for i, pool in config.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["etcd"] == "true", false)]))])
+    condition     = alltrue([for config in var.cluster_configs : contains([1, 3, 5], sum([for pool in config.roles_per_pool : try(tonumber(pool.quantity), 1) if try(pool.etcd == true, false)]))])
     error_message = "The number of etcd nodes per cluster must be one of [1, 3, 5]."
   }
   validation {
-    condition     = alltrue([for config in var.cluster_configs : sum([for i, pool in config.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["control-plane"] == "true", false)]) >= 1])
+    condition     = alltrue([for config in var.cluster_configs : sum([for i, pool in config.roles_per_pool : try(tonumber(pool.quantity), 1) if try(pool.control-plane == true, false)]) >= 1])
     error_message = "The number of control-plane nodes per cluster must be >= 1."
   }
   validation {
-    condition     = alltrue([for config in var.cluster_configs : sum([for i, pool in config.roles_per_pool : try(tonumber(pool["quantity"]), 1) if try(pool["worker"] == "true", false)]) >= 1])
+    condition     = alltrue([for config in var.cluster_configs : sum([for i, pool in config.roles_per_pool : try(tonumber(pool.quantity), 1) if try(pool.worker == true, false)]) >= 1])
     error_message = "The number of worker nodes per cluster must be >= 1."
   }
   validation {

@@ -47,7 +47,7 @@ resource "rancher2_cluster_sync" "k3s" {
   cluster_id    = rancher2_cluster.k3s.id
   state_confirm = 3
   depends_on = [
-    aws_instance.this
+    linode_instance.this
   ]
 }
 

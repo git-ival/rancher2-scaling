@@ -57,11 +57,12 @@ locals {
   node_pool_name           = substr("${local.rancher_subdomain}-nt${local.name_suffix}", 0, local.name_max_length)
   cluster_name             = length(var.cluster_name) > 0 ? var.cluster_name : "${substr("${local.rancher_subdomain}-${local.name_suffix}", 0, local.name_max_length)}"
   node_pool_count          = length(var.roles_per_pool)
-  kube_api = var.kube_api_debugging ? {
-    extra_args = {
+  kube_api = {
+    extra_args = var.kube_api_debugging ? {
       v = "3"
-    }
-  } : null
+    } : null
+    admission_configuration = var.admission_configuration != null ? var.admission_configuration : null
+  }
 }
 
 module "cloud_credential" {
@@ -165,6 +166,10 @@ module "rancher_monitoring" {
   depends_on = [
     local_file.kube_config
   ]
+}
+
+output "psa_config" {
+  value = var.psa_config
 }
 
 output "create_node_reqs" {

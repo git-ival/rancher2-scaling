@@ -13,6 +13,34 @@ resource "rancher2_cluster" "this" {
   labels                                                     = try(var.labels, null)
   annotations                                                = try(var.annotations, null)
   default_pod_security_admission_configuration_template_name = try(var.default_pod_security_admission_configuration_template_name, null)
+  dynamic "fleet_agent_deployment_customization" {
+    for_each = var.fleet_agent_deployment_customization != null ? var.fleet_agent_deployment_customization : []
+    iterator = customization
+    content {
+      dynamic "append_tolerations" {
+        for_each = customization.value.append_tolerations
+        iterator = toleration
+        content {
+          key      = try(toleration.value.key, "")
+          operator = try(toleration.value.operator, "")
+          value    = try(toleration.value.value, "")
+          effect   = try(toleration.value.effect, "")
+          seconds  = try(toleration.value.seconds, null)
+        }
+      }
+      override_affinity = customization.value.override_affinity
+      dynamic "override_resource_requirements" {
+        for_each = customization.value.override_resource_requirements
+        iterator = requirement
+        content {
+          cpu_limit      = try(requirement.value.cpu_limit, "")
+          cpu_request    = try(requirement.value.cpu_request, "")
+          memory_limit   = try(requirement.value.memory_limit, "")
+          memory_request = try(requirement.value.memory_request, "")
+        }
+      }
+    }
+  }
   dynamic "agent_env_vars" {
     for_each = var.agent_env_vars != null ? var.agent_env_vars : []
     iterator = env_var
@@ -77,6 +105,7 @@ resource "rancher2_cluster" "this" {
           for_each = var.kube_api != null ? [var.kube_api] : []
           iterator = item
           content {
+            # admission_configuration = try(item.value.admission_configuration, null)
             dynamic "admission_configuration" {
               for_each = try(item.value.admission_configuration != null, false) ? [item.value.admission_configuration] : []
               iterator = config

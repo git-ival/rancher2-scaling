@@ -27,8 +27,8 @@ locals {
 
 ## Provision LB, and Auto Scaling Groups of server nodes
 module "aws_infra_rke2" {
-  source = "git::https://github.com/git-ival/rke2-aws-tf.git//?ref=dev"
-  # source = "../../../../rke2-aws-tf/"
+  # source = "git::https://github.com/git-ival/rke2-aws-tf.git//?ref=dev"
+  source = "../../../../rke2-aws-tf/"
 
   cluster_name                                     = var.name
   fqdn                                             = aws_route53_record.public.fqdn
@@ -71,8 +71,8 @@ module "aws_infra_rke2" {
 ## Provision Auto Scaling Group of agent to auto-join cluster with taints and labels for monitoring only
 module "rke2_monitor_pool" {
   count = var.setup_monitoring_agent ? 1 : 0
-  source = "git::https://github.com/git-ival/rke2-aws-tf.git//modules/agent-nodepool?ref=dev"
-  # source = "../../../../rke2-aws-tf/modules/agent-nodepool/"
+  # source = "git::https://github.com/git-ival/rke2-aws-tf.git//modules/agent-nodepool?ref=dev"
+  source = "../../../../rke2-aws-tf/modules/agent-nodepool/"
 
   name                        = "monitoring"
   vpc_id                      = var.vpc_id
@@ -81,7 +81,6 @@ module "rke2_monitor_pool" {
   instance_type               = var.server_instance_type
   tags                        = local.tags
   extra_security_group_ids    = [aws_security_group.ingress_egress.id, aws_security_group.rancher.id]
-  extra_target_group_arns     = [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn]
   associate_public_ip_address = true
   metadata_options            = {}
   iam_instance_profile        = var.iam_instance_profile

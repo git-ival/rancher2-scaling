@@ -1,8 +1,8 @@
 terraform {
   required_providers {
-    # rancher2 = {
-    #   source = "rancher/rancher2"
-    # }
+    rancher2 = {
+      source = "rancher/rancher2"
+    }
     # helm = {
     #   source = "hashicorp/helm"
     # }
@@ -15,19 +15,19 @@ terraform {
   }
 }
 
-# provider "rancher2" {
-#   alias     = "bootstrap"
-#   api_url   = var.rancher_api_url
-#   insecure  = false
-#   bootstrap = true
-# }
+provider "rancher2" {
+  alias     = "bootstrap"
+  api_url   = var.rancher_api_url
+  insecure  = false
+  bootstrap = true
+}
 
-# provider "rancher2" {
-#   alias     = "admin"
-#   api_url   = module.install_common.rancher_url
-#   token_key = module.install_common.rancher_token
-#   timeout   = "300s"
-# }
+provider "rancher2" {
+  alias     = "admin"
+  api_url   = module.install_common.rancher_url
+  token_key = module.install_common.rancher_token
+  timeout   = "300s"
+}
 
 # provider "helm" {
 #   kubernetes {

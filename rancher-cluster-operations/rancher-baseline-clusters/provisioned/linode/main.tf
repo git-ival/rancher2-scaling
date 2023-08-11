@@ -78,7 +78,7 @@ module "bulk_components" {
 
   cluster_name         = each.value.name
   project              = each.value.project
-  namespace            = var.num_secrets > 0 ? "baseline-${each.value.id}-namespace-0" : null
+  namespace            = "baseline-${each.value.id}-namespace-0"
   num_projects         = var.num_projects
   num_namespaces       = var.num_namespaces
   num_secrets          = var.num_secrets

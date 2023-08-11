@@ -1,11 +1,11 @@
 output "cluster_names" {
-  value = local.cluster_names
+  value = [rancher2_cluster.k3s.name]
 }
 
 output "public_ip" {
-  value = aws_instance.this.public_ip
+  value = linode_instance.this[0].ip_address
 }
 
 output "instance_id" {
-  value = aws_instance.this.id
+  value = linode_instance.this[0].id
 }

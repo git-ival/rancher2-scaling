@@ -23,7 +23,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/*/ubuntu-bionic-18.04-*"]
+    values = ["ubuntu/images/*/ubuntu-*-20.04-*"]
   }
 
   filter {

@@ -41,7 +41,7 @@ locals {
   all_secrets = [for secret in module.secrets[*] : {
     "name"         = "${local.secret_name_prefix}-${index(module.secrets[*], secret)}",
     "id"           = secret.id,
-    "namespace_id" = data.rancher2_namespace.this[0].id,
+    "namespace_id" = data.rancher2_namespace.this.id,
     "cluster_id"   = data.rancher2_cluster.this.id,
     "project_id"   = data.rancher2_project.this[0].id,
     "description"  = secret.description,
@@ -91,9 +91,10 @@ data "rancher2_project" "this" {
 
 ### Pre-existing namespace, currently only used for bulk secrets creation
 data "rancher2_namespace" "this" {
-  count      = length(var.namespace) > 0 && var.num_secrets > 0 ? 1 : 0
+  # count      = length(var.namespace) > 0 ? 1 : 0
   name       = var.namespace
   project_id = data.rancher2_project.this[0].id
+  depends_on = [rancher2_namespace.this]
 }
 
 ### Bulk create rancher tokens
@@ -114,8 +115,9 @@ module "secrets" {
   name        = "${local.secret_name_prefix}-${count.index}"
   description = "Bulk Secret ${count.index}"
   project_id  = data.rancher2_project.this[0].id
-  namespace   = data.rancher2_namespace.this[0].id
+  namespace   = data.rancher2_namespace.this.id
   data        = var.secret_data
+  depends_on  = [rancher2_namespace.this]
 }
 
 ### Bulk create v2 secrets

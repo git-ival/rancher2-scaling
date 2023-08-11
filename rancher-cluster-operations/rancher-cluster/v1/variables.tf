@@ -3,8 +3,8 @@ variable "k8s_distribution" {
   default     = null
   description = "The K8s distribution to use for setting up the cluster. One of k3s, rke1, or rke2."
   validation {
-    condition     = contains(["k3s", "rke1", "rke2"], var.k8s_distribution)
-    error_message = "Please pass in a string equal to one of the following: [\"k3s\", \"rke1\", \"rke2\"]."
+    condition     = var.k8s_distribution == null ? true : contains(["k3s", "rke1", "rke2"], var.k8s_distribution)
+    error_message = "Please pass in a string equal to one of the following: [\"k3s\", \"rke1\", \"rke2\"] or null."
   }
 }
 
@@ -71,4 +71,14 @@ variable "default_pod_security_admission_configuration_template_name" {
     condition     = var.default_pod_security_admission_configuration_template_name == null ? true : length(var.default_pod_security_admission_configuration_template_name) > 0 || contains([null, "", "rancher-privileged", "rancher-restricted"], var.default_pod_security_admission_configuration_template_name)
     error_message = "var.default_pod_security_admission_configuration_template_name must be one of [null, '','rancher-privileged', 'rancher-restricted'] OR the name of an existing PSACT."
   }
+}
+
+variable "fleet_agent_deployment_customization" {
+  type = list(object({
+    append_tolerations             = optional(list(map(string)), [])
+    override_affinity              = optional(string, null)
+    override_resource_requirements = optional(list(map(string)), [])
+  }))
+  default     = null
+  description = "Optional customization for fleet agent. For Rancher v2.7.5 and above"
 }

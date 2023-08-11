@@ -76,6 +76,7 @@ resource "helm_release" "rancher" {
       private_ca                = length(var.private_ca_file) > 0 ? true : false
       private_ca_file           = var.private_ca_file
       cattle_prometheus_metrics = var.cattle_prometheus_metrics
+      debug                     = var.rancher_debug_flag
       rancher_env_vars          = length(var.rancher_env_vars) > 0 ? var.rancher_env_vars : []
       }
     )

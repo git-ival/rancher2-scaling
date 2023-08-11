@@ -95,7 +95,7 @@ variable "create_rancher_security_group" {
 variable "extra_security_groups" {
   default     = []
   type        = list(string)
-  description = "List of IDs for additional security groups to attach to rke1 server instances"
+  description = "List of Names for additional security groups to attach to rke1 server instances"
 }
 
 variable "aws_azs" {

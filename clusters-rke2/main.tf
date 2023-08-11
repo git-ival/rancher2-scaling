@@ -108,7 +108,7 @@ resource "rancher2_cluster_v2" "rke2" {
   name                                                       = local.cluster_name
   labels                                                     = var.cluster_labels
   kubernetes_version                                         = var.k8s_version
-  default_pod_security_admission_configuration_template_name = each.value.psa_config
+  default_pod_security_admission_configuration_template_name = var.psa_config
 
   rke_config {
     dynamic "machine_pools" {
@@ -131,7 +131,7 @@ resource "rancher2_cluster_v2" "rke2" {
   }
 
   timeouts {
-    create = "15m"
+    create = "40m"
   }
 
   depends_on = [

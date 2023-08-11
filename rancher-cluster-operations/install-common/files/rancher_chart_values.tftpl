@@ -23,6 +23,7 @@ replicas: ${rancher_node_count}
 %{ if use_new_bootstrap ~}
 bootstrapPassword: ${rancher_password}
 %{ endif ~}
+debug: '${debug}'
 extraEnv:
 - name: CATTLE_PROMETHEUS_METRICS
   value: '${cattle_prometheus_metrics}'

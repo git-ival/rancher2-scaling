@@ -32,7 +32,7 @@ services:
 %{ endif ~}
 %{ if length(psa_file) > 0 ~}
     admission_configuration:
-      ${file(psa_file)}
+      ${indent(6, psa_file)}
 %{ endif ~}
     secrets_encryption_config:
       enabled: ${enable_secrets_encryption}

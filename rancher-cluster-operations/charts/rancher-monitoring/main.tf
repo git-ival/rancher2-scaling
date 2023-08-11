@@ -8,7 +8,7 @@ terraform {
 }
 
 locals {
-  default_values = abspath("${path.module}/files/rancher_monitoring_chart_values.yaml")
+  default_values = var.strict_taints ? abspath("${path.module}/files/rancher_monitoring_chart_strict_taint_values.yaml") : ("${path.module}/files/rancher_monitoring_chart_values.yaml")
   values         = try(length(var.values) > 0 ? var.values : local.default_values, local.default_values)
 }
 

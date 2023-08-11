@@ -1,11 +1,20 @@
-variable "infra_provider" {
+# variable "linode_config_path" {
+#   type        = string
+#   default     = "~/.config/linode"
+#   description = "The path to the Linode config file to use (https://registry.terraform.io/providers/linode/linode/latest/docs#using-configuration-files)"
+# }
+
+# variable "linode_config_profile" {
+#   type        = string
+#   default     = "default"
+#   description = "The Linode config profile to use (https://registry.terraform.io/providers/linode/linode/latest/docs#using-configuration-files)"
+# }
+
+variable "linode_token" {
   type        = string
-  description = "(optional) describe your variable"
+  description = "Linode API token"
   nullable    = false
-  validation {
-    condition     = contains(["aws", "linode"], var.infra_provider)
-    error_message = "The infrastructure provider to use, must be one of ['aws', 'linode']."
-  }
+  sensitive   = true
 }
 
 variable "region" {
@@ -27,12 +36,24 @@ variable "node_count" {
 
 variable "node_image" {
   type        = string
-  default     = null
+  default     = "ubuntu/20.04"
   description = <<-EOT
   The image ID to use for the selected cloud provider.
   AWS assumes an AMI ID, Linode assumes a linode image.
-  Defaults to the latest 18.04 Ubuntu image.
+  Defaults to the latest 20.04 Ubuntu image.
   EOT
+}
+
+variable "linode_group" {
+  type        = string
+  default     = ""
+  description = "The display group for the linode(s). Defaults to the generated cluster_name if not set"
+}
+
+variable "linode_keys" {
+  type        = list(string)
+  default     = null
+  description = "A list of SSH public keys to deploy for the root user on the newly created Linode"
 }
 
 variable "linode_users" {
@@ -45,11 +66,9 @@ variable "linode_users" {
   EOT
 }
 
-variable "linode_token" {
+variable "root_pass" {
   type        = string
-  description = "Linode API token"
-  nullable    = false
-  sensitive   = true
+  description = "(Optional) The root user’s password on a newly-created Linode."
 }
 
 variable "random_prefix" {
@@ -75,3 +94,8 @@ variable "r53_domain" {
   description = "DNS domain for Route53 zone (defaults to domain if unset)"
 }
 
+variable "tags" {
+  type        = list(string)
+  default     = []
+  description = "A comma-separated list of tags"
+}

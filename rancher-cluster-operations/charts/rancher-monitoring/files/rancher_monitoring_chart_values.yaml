@@ -1,6 +1,11 @@
+alertmanager:
+  enabled: false
 prometheus:
   prometheusSpec:
     evaluationInterval: 1m
+    resources:
+      limits:
+        memory: 5000Mi
     retentionSize: 50GiB
     scrapeInterval: 1m
 global:

@@ -97,7 +97,7 @@ variable "node_image" {
   description = <<-EOT
   The image ID to use for the selected cloud provider.
   AWS assumes an AMI ID, Linode assumes a linode image.
-  Defaults to the latest 18.04 Ubuntu image.
+  Defaults to the latest 20.04 Ubuntu image.
   EOT
 }
 
@@ -135,9 +135,7 @@ variable "domain" {
   default = ""
 }
 
-variable "r53_domain" {
-  type        = string
-  default     = ""
-  description = "DNS domain for Route53 zone (defaults to domain if unset)"
+variable "expose_kube_api_port" {
+  type    = bool
+  default = true
 }
-

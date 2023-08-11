@@ -218,6 +218,7 @@ variable "wait_for_active" {
 
 variable "auto_replace_timeout" {
   type        = number
+  default     = null
   description = "Time to wait after Cluster becomes Active before deleting nodes that are unreachable"
 }
 
@@ -226,7 +227,25 @@ variable "psa_config" {
   default     = null
   description = "The default PSACT name to set on each cluster"
   validation {
-    condition     = var.psa_config == null ? true : length(var.psa_config) > 0 || contains([null, "", "rancher-privileged", "rancher-restricted"], var.psa_config)
-    error_message = "var.psa_config must be one of [null, '','rancher-privileged', 'rancher-restricted'] OR the name of an existing PSACT."
+    condition     = var.psa_config == null || var.psa_config == "" ? true : length(var.psa_config) > 0 && contains(["rancher-privileged", "rancher-restricted"], var.psa_config)
+    error_message = "var.psa_config must be one of [null, '','rancher-privileged', 'rancher-restricted']."
   }
+}
+
+variable "admission_configuration" {
+  type = object({
+    api_version = string
+    kind        = string
+    plugins     = list(map(string))
+  })
+  default = {
+    api_version = "apiserver.config.k8s.io/v1"
+    kind        = "AdmissionConfiguration"
+    plugins = [{
+      name          = "PodSecurity"
+      path          = ""
+      configuration = file("./files/privileged-podsecurity-1-26.yaml")
+    }]
+  }
+  description = "value"
 }

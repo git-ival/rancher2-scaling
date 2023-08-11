@@ -61,7 +61,7 @@ locals {
     private_address = module.linode_infra[0].instances[i].private_ip_address
   }]
   system_images             = yamlencode(var.system_images)
-  rke_metadata_config_index = length(var.rancher_settings) > 0 ? index(var.rancher_settings.*.name, "rke-metadata-config") : null
+  rke_metadata_config_index = try(length(var.rancher_settings) > 0 ? index(var.rancher_settings.*.name, "rke-metadata-config") : null, null)
   rke_metadata_url          = try(local.rke_metadata_config_index >= 0 ? var.rancher_settings[local.rke_metadata_config_index].value.url : "", "")
   rke_command               = length(local.rke_metadata_url) > 0 ? "RANCHER_METADATA_URL=${local.rke_metadata_url} rke up --config ${local.cluster_yml}" : "rke up --config ${local.cluster_yml}"
 }
@@ -79,18 +79,21 @@ module "aws_infra" {
     aws = aws
   }
 
-  vpc_id                 = data.aws_vpc.default[0].id
-  create_external_nlb    = true
-  name                   = local.name
-  user                   = data.aws_caller_identity.current[0].user_id
-  ssh_keys               = var.ssh_keys
-  ssh_key_path           = var.ssh_key_path
-  server_instance_type   = var.node_type
-  server_node_count      = local.server_node_count
-  install_docker_version = var.install_docker_version
-  domain                 = local.domain
-  r53_domain             = var.r53_domain
-  s3_instance_profile    = var.s3_instance_profile
+  vpc_id                        = data.aws_vpc.default[0].id
+  name                          = local.name
+  user                          = data.aws_caller_identity.current[0].user_id
+  ssh_keys                      = var.ssh_keys
+  ssh_key_path                  = var.ssh_key_path
+  server_instance_type          = var.node_type
+  server_node_count             = local.server_node_count
+  install_docker_version        = var.install_docker_version
+  create_rancher_security_group = var.install_rancher
+  extra_security_groups         = var.install_rancher ? [] : ["open-all"]
+  create_internal_nlb           = var.expose_kube_api_port
+  create_external_nlb           = var.install_rancher
+  use_route53                   = length(local.domain) > 0 ? true : false
+  domain                        = local.domain
+  s3_instance_profile           = var.s3_instance_profile
 }
 
 module "linode_infra" {
@@ -132,7 +135,7 @@ resource "local_file" "cluster_yml" {
     monitor_address           = local.monitor_address,
     monitor_private_address   = local.monitor_private_address,
     psa_config                = var.psa_config,
-    psa_file                  = var.psa_file,
+    psa_file                  = length(var.psa_file) > 0 ? file(var.psa_file) : "",
     enable_secrets_encryption = var.enable_secrets_encryption,
     enable_audit_log          = var.enable_audit_log,
     ssh_key_path              = var.ssh_key_path,
@@ -198,6 +201,7 @@ module "install_common" {
   rancher_password               = var.rancher_password
   use_new_bootstrap              = local.use_new_bootstrap
   rancher_node_count             = var.node_count
+  rancher_debug_flag             = var.rancher_loglevel == "debug" ? true : false
   rancher_env_vars               = var.rancher_env_vars
   rancher_additional_values      = var.rancher_additional_values
   cattle_prometheus_metrics      = var.cattle_prometheus_metrics

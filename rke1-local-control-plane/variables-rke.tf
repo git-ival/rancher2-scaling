@@ -30,10 +30,10 @@ variable "system_images" {
 
 variable "psa_config" {
   type        = string
-  default     = "privileged"
+  default     = ""
   description = "A string specifying which default RKE1 Pod Security Admission Configuration Template (PSACT) to use"
   validation {
-    condition     = contains(["privileged", "restricted"], var.psa_config)
+    condition     = length(var.psa_config) == 0 ? true : contains(["privileged", "restricted"], var.psa_config)
     error_message = "var.psa_config must be one of ['privileged', 'restricted']."
   }
 }

@@ -16,6 +16,12 @@ variable "use_v2" {
   description = "Boolean to determine which version of rancher_catalog and rancher_app to use"
 }
 
+variable "strict_taints" {
+  default     = false
+  type        = bool
+  description = "Boolean that will switch the values file to one that will limit the deployment to nodes tainted with 'monitoring = yes'"
+}
+
 variable "charts_repo" {
   default     = "https://git.rancher.io/charts"
   type        = string
@@ -47,7 +53,8 @@ variable "cluster_id" {
 }
 
 variable "project_id" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "timeouts" {
