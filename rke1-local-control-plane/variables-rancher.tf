@@ -44,10 +44,10 @@ variable "rancher_password" {
   description = "Password to set for admin user during bootstrap of Rancher Server, if not set random password will be generated"
 }
 
-variable "rancher_chart" {
+variable "helm_rancher_repo" {
+  default     = "https://releases.rancher.com/server-charts/latest"
   type        = string
-  default     = "latest"
-  description = "Helm chart to use for Rancher install"
+  description = "The repo URL to use for Rancher Server charts"
 }
 
 variable "rancher_charts_repo" {

@@ -124,8 +124,6 @@ module "rancher_monitoring" {
   }
 
   use_v2        = true
-  rancher_url   = var.rancher_api_url
-  rancher_token = var.rancher_token_key
   charts_branch = var.rancher_charts_branch
   chart_version = var.monitoring_version
   cluster_id    = module.cluster_v1.id

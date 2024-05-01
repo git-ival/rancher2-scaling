@@ -244,7 +244,7 @@ variable "admission_configuration" {
     plugins = [{
       name          = "PodSecurity"
       path          = ""
-      configuration = file("./files/privileged-podsecurity-1-26.yaml")
+      configuration = "./files/privileged-podsecurity-1-26.yaml"
     }]
   }
   description = "value"

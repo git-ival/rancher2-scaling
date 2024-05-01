@@ -148,6 +148,18 @@ variable "install_monitoring" {
   description = "Boolean that defines whether or not to install rancher-monitoring"
 }
 
+variable "rancher_charts_branch" {
+  type        = string
+  default     = "release-v2.7"
+  description = "The github branch for the desired Rancher chart version"
+}
+
+variable "monitoring_version" {
+  type        = string
+  default     = null
+  description = "Version of Monitoring v2 to install - Do not include the v prefix."
+}
+
 variable "server_instance_type" {
   type        = string
   description = "Cloud provider-specific instance type string to use for rke1 server"

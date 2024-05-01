@@ -1,0 +1,19 @@
+bootstrapPassword: N7q-*fs+Ut&Wb_Y
+extraEnv:
+- name: CATTLE_PROMETHEUS_METRICS
+  value: "true"
+global:
+  cattle:
+    psp:
+      enabled: false
+hostname: ival-mite-rke1.qa.rancher.space
+ingress:
+  tls:
+    source: letsEncrypt
+letsEncrypt:
+  email: iramis.valentin@suse.com
+  ingress:
+    class: nginx
+rancherImage: ghcr.io/moio/rancher
+rancherImageTag: v2.7.12-qa-39597-1
+replicas: 3

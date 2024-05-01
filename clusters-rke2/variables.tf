@@ -108,18 +108,6 @@ variable "agent_env_vars" {
   }
 }
 
-variable "create_keypair" {
-  type        = bool
-  default     = false
-  description = "Boolean used to determine whether or not to create a keypair or use a pre-existing one. Useful for easing the process of ssh-ing into clusters"
-}
-
-variable "keypair_name" {
-  type        = string
-  default     = null
-  description = "Name of a key pair within the specified AWS region to add to the cluster's nodes. If this is set and var.ssh_key_path is not set then a new tls_private_key resource will be created and used to create a new aws_key_pair. These new resources will then be added to the rancher2_machine_config_v2"
-}
-
 variable "ssh_key_path" {
   default     = null
   type        = string

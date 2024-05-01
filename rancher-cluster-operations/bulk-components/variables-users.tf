@@ -7,6 +7,7 @@ variable "num_users" {
 variable "user_password" {
   type        = string
   description = "Password to use for created users"
+  default     = ""
   sensitive   = true
 }
 

@@ -73,6 +73,12 @@ variable "rancher_token_key" {
   description = "rancher server API token"
 }
 
+variable "install_folding" {
+  type = bool
+  default = false
+  description = "Flag used to determine if helm-foldingathome should be installed"
+}
+
 variable "install_monitoring" {
   type        = bool
   default     = false
@@ -96,6 +102,7 @@ variable "monitoring_version" {
   default     = ""
   description = "Version of Monitoring v2 to install - Do not include the v prefix."
 }
+
 variable "insecure_flag" {
   type        = bool
   default     = false
@@ -115,7 +122,12 @@ variable "cluster_configs" {
       control-plane = bool
       worker        = bool
       labels        = optional(map(string), {})
-      taints        = optional(list(map(string)), [])
+      taints = optional(list(object({
+        key        = string
+        value      = string
+        effect     = string
+        time_added = string
+      })), [])
       })), [
       {
         "quantity"      = 3

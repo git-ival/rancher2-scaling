@@ -50,8 +50,9 @@ locals {
   subnet_ids_random_index  = random_id.index.dec % length(local.subnet_ids_list)
   instance_subnet_id       = local.subnet_ids_list[local.subnet_ids_random_index]
   rancher_subdomain        = split(".", split("//", "${var.rancher_api_url}")[1])[0]
+  tags                     = "Owner,${local.cluster_name},DoNotDelete,true"
   name_max_length          = 60
-  name_suffix              = length(var.name_suffix) > 0 ? var.name_suffix : "${terraform.workspace}"
+  name_suffix              = length(var.name_suffix) > 0 ? var.name_suffix : "rke1-${terraform.workspace}"
   cloud_cred_name          = length(var.cloud_cred_name) > 0 ? var.cloud_cred_name : "${local.rancher_subdomain}-cloud-cred-${local.name_suffix}"
   node_template_name       = length(var.node_template_name) > 0 ? var.node_template_name : "${local.rancher_subdomain}-nt-${local.name_suffix}"
   node_pool_name           = substr("${local.rancher_subdomain}-nt${local.name_suffix}", 0, local.name_max_length)
@@ -61,7 +62,15 @@ locals {
     extra_args = var.kube_api_debugging ? {
       v = "3"
     } : null
-    admission_configuration = var.admission_configuration != null ? var.admission_configuration : null
+    admission_configuration = var.admission_configuration != null ? {
+      api_version = var.admission_configuration.api_version
+      kind        = var.admission_configuration.kind
+      plugins = [for plugin in var.admission_configuration.plugins : {
+        name          = plugin.name
+        path          = plugin.path
+        configuration = file(plugin.configuration)
+      }]
+    } : null
   }
 }
 
@@ -96,6 +105,7 @@ module "node_template" {
     root_size            = var.volume_size
     volume_type          = var.volume_type
     iam_instance_profile = var.iam_instance_profile
+    tags                 = local.tags
   }
   engine_fields = var.node_template_engine_fields
 }
@@ -156,8 +166,6 @@ module "rancher_monitoring" {
   }
 
   use_v2        = true
-  rancher_url   = var.rancher_api_url
-  rancher_token = var.rancher_token_key
   charts_branch = var.rancher_charts_branch
   chart_version = var.monitoring_version
   cluster_id    = module.cluster_v1.id

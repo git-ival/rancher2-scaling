@@ -49,7 +49,6 @@ resource "rancher2_node_template" "this" {
       iam_instance_profile       = try(var.node_config.iam_instance_profile, null)
       insecure_transport         = try(var.node_config.insecure_transport, null)
       instance_type              = try(var.node_config.instance_type, null)
-      keypair_name               = try(var.node_config.keypair_name, null)
       kms_key                    = try(var.node_config.kms_key, null)
       monitoring                 = try(var.node_config.monitoring, null)
       open_port                  = try(var.node_config.open_port, null)

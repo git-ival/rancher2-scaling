@@ -18,14 +18,15 @@ terraform {
 
 locals {
   name                        = var.name
-  instance_names              = "${local.name}-HA"
+  instance_names              = local.name
   server_instance_type        = var.server_instance_type
-  server_image_id             = var.server_image_id != null ? var.server_image_id : data.aws_ami.ubuntu.id
+  ami_id                      = var.ami_id != null ? var.ami_id : data.aws_ami.ubuntu.id
   aws_azs                     = var.aws_azs
   public_subnets              = length(var.public_subnets) > 0 ? var.public_subnets : data.aws_subnets.available.ids
   private_subnets             = length(var.private_subnets) > 0 ? var.private_subnets : data.aws_subnets.available.ids
   server_node_count           = var.server_node_count
   ssh_keys                    = var.ssh_keys
+  extra_security_groups       = compact(concat(data.aws_security_group.extras[*].id, var.create_rancher_security_group ? [aws_security_group.rancher_server[0].id] : [], var.create_registered_cluster_security_group ? [aws_security_group.registered_cluster[0].id] : []))
   install_docker_version      = trim(var.install_docker_version, " ")
   s3_instance_profile         = var.s3_instance_profile
   domain                      = var.domain

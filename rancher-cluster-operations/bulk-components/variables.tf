@@ -19,15 +19,15 @@ variable "use_v2" {
   description = "Flag to determine whether or not to use the v2 version of a given resource"
 }
 
-variable "rancher_api_url" {
-  type        = string
-  description = "api url for rancher server"
-}
+# variable "rancher_api_url" {
+#   type        = string
+#   description = "api url for rancher server"
+# }
 
-variable "rancher_token_key" {
-  type        = string
-  description = "rancher server API token"
-}
+# variable "rancher_token_key" {
+#   type        = string
+#   description = "rancher server API token"
+# }
 
 variable "cluster_name" {
   type        = string

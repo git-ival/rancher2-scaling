@@ -16,6 +16,9 @@ resource "rancher2_cluster_v2" "cluster_v2" {
   kubernetes_version                                         = each.value.k8s_version
   cloud_credential_secret_name                               = module.cloud_credential.id
   default_pod_security_admission_configuration_template_name = each.value.psa_config
+    local_auth_endpoint {
+    enabled = true
+  }
   dynamic "fleet_agent_deployment_customization" {
     for_each = local.v2_fleet_customization
     iterator = customization

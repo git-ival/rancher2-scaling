@@ -19,6 +19,15 @@ resource "aws_security_group_rule" "ingress_http" {
   security_group_id = aws_security_group.ingress.id
 }
 
+resource "aws_security_group_rule" "ingress_ssh" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.ingress.id
+}
+
 resource "aws_security_group_rule" "ingress_https" {
   type              = "ingress"
   from_port         = 443
@@ -57,7 +66,7 @@ data "aws_iam_instance_profile" "this" {
 
 resource "aws_launch_template" "server" {
   name_prefix   = local.name
-  image_id      = local.server_image_id
+  image_id      = local.ami_id
   instance_type = local.server_instance_type
   user_data     = data.cloudinit_config.server.rendered
 
@@ -77,7 +86,7 @@ resource "aws_launch_template" "server" {
 
   network_interfaces {
     delete_on_termination = true
-    security_groups       = compact(concat([aws_security_group.ingress.id], var.create_rancher_security_group ? [aws_security_group.rancher_server[0].id] : [""], data.aws_security_group.extras[*].id))
+    security_groups       = compact(concat([aws_security_group.ingress.id], local.extra_security_groups))
   }
 
   lifecycle {

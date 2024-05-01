@@ -2,11 +2,12 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     rancher2 = {
-      source = "rancher/rancher2"
-      # version = "1.21.0"
+      source  = "rancher/rancher2"
+      version = ">= 2.0.0, <= 5.0.0"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "5.22.0"
     }
     random = {
       source = "hashicorp/random"
@@ -46,19 +47,17 @@ locals {
   subnet_ids_list          = tolist(data.aws_subnets.available.ids)
   subnet_ids_random_index  = random_id.index.dec % length(local.subnet_ids_list)
   instance_subnet_id       = local.subnet_ids_list[local.subnet_ids_random_index]
-  keypair_name_valid       = try(var.keypair_name != null && length(var.keypair_name) > 0, false)
   ssh_key_path_valid       = try(var.ssh_key_path != null && length(var.ssh_key_path) > 0, false)
-  create_private_key       = !local.ssh_key_path_valid && var.create_keypair ? true : false
+  create_private_key       = !local.ssh_key_path_valid ? true : false
   rancher_subdomain        = split(".", split("//", "${var.rancher_api_url}")[1])[0]
-  keypair_name             = var.create_keypair ? local.keypair_name_valid ? var.keypair_name : "${local.rancher_subdomain}-aws-keypair" : null
   public_key_path_valid    = try(var.public_key_path != null && length(var.public_key_path) > 0, false)
-  public_key               = var.create_keypair ? local.public_key_path_valid ? file(var.public_key_path) : trimspace(tls_private_key.node_key[0].public_key_openssh) : null
-  ssh_key_contents         = var.create_keypair ? local.ssh_key_path_valid ? file(var.ssh_key_path) : trimspace(tls_private_key.node_key[0].private_key_openssh) : null
-  cloud_cred_name          = length(var.cloud_cred_name) > 0 ? var.cloud_cred_name : "${local.rancher_subdomain}-aws-cloud-cred"
+  public_key               = local.public_key_path_valid && local.create_private_key ? file(var.public_key_path) : trimspace(tls_private_key.node_key[0].public_key_openssh)
+  ssh_key_contents         = local.ssh_key_path_valid && local.create_private_key ? file(var.ssh_key_path) : trimspace(tls_private_key.node_key[0].private_key_openssh)
+  cloud_cred_name          = length(var.cloud_cred_name) > 0 ? var.cloud_cred_name : "${local.rancher_subdomain}-${local.name_suffix}-aws-cloud-cred"
   security_groups          = [for group in data.aws_security_group.selected : group.name]
   name_max_length          = 60
-  name_suffix              = length(var.name_suffix) > 0 ? var.name_suffix : "${terraform.workspace}"
-  machine_pool_name        = substr("${local.cluster_name}-np", 0, local.name_max_length)
+  name_suffix              = length(var.name_suffix) > 0 ? var.name_suffix : "rke2-${terraform.workspace}"
+  machine_pool_name        = substr("np", 0, local.name_max_length)
   cluster_name             = length(var.cluster_name) > 0 ? var.cluster_name : "${substr("${local.rancher_subdomain}-${local.name_suffix}", 0, local.name_max_length)}"
 }
 
@@ -78,12 +77,6 @@ resource "tls_private_key" "node_key" {
   algorithm = "RSA"
 }
 
-resource "aws_key_pair" "this" {
-  count      = var.create_keypair ? 1 : 0
-  key_name   = local.keypair_name
-  public_key = local.public_key
-}
-
 resource "rancher2_machine_config_v2" "aws" {
   generate_name = local.machine_pool_name
   amazonec2_config {
@@ -95,12 +88,11 @@ resource "rancher2_machine_config_v2" "aws" {
     zone                 = local.selected_az_suffix
     iam_instance_profile = var.iam_instance_profile
     instance_type        = var.server_instance_type
-    keypair_name         = local.keypair_name
     ssh_user             = "ubuntu"
-    ssh_key_contents     = local.ssh_key_contents
-    tags                 = "RancherScaling,${var.cluster_name},Owner,${var.cluster_name}"
-    volume_type          = var.volume_type
-    root_size            = var.volume_size
+    # ssh_key_contents     = local.ssh_key_contents
+    tags        = "RancherScaling,${local.rancher_subdomain}-${local.name_suffix},Owner,${local.rancher_subdomain}-${local.name_suffix},DoNotDelete,true"
+    volume_type = var.volume_type
+    root_size   = var.volume_size
   }
 }
 
@@ -115,7 +107,7 @@ resource "rancher2_cluster_v2" "rke2" {
       for_each = var.roles_per_pool
       iterator = pool
       content {
-        name                         = "${local.machine_pool_name}${pool.key}"
+        name                         = "${local.rancher_subdomain}-${local.name_suffix}${pool.key}"
         cloud_credential_secret_name = data.rancher2_cloud_credential.this.id
         control_plane_role           = try(tobool(pool.value["control-plane"]), false)
         worker_role                  = try(tobool(pool.value["worker"]), false)

@@ -1,11 +1,7 @@
 module "node_template" {
-  # for_each = local.v1_configs
   for_each = {
     for pool in local.v1_pools : "${pool.name}" => pool
   }
-  # for_each = {
-  #   for i, config in local.v1_configs_map : "${i}" => config
-  # }
   source = "../../../rancher-node-template"
   providers = {
     rancher2 = rancher2
@@ -54,9 +50,6 @@ resource "rancher2_node_pool" "cluster_v1_np" {
 
 module "cluster_v1" {
   for_each = local.v1_configs
-  # for_each = {
-  #   for i, config in local.v1_configs_map : "${i}" => config
-  # }
   source = "../../../rancher-cluster/v1"
   providers = {
     rancher2 = rancher2

@@ -44,7 +44,7 @@ output "use_new_bootstrap" {
   value = local.use_new_bootstrap
 }
 
-output "kube_config_path" {
+output "kubeconfig" {
   value = abspath(local.kube_config)
 }
 

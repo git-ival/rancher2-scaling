@@ -1,7 +1,13 @@
-variable "server_image_id" {
+variable "ami_id" {
   type        = string
   default     = null
   description = "AMI to use for rke1 server instances"
+}
+
+variable "ami_name" {
+  type        = string
+  default     = "ubuntu/images/*/ubuntu-*-22.04-*"
+  description = "AMI string to use for filtering AMIs by name"
 }
 
 variable "volume_size" {
@@ -62,6 +68,12 @@ variable "server_instance_ssh_user" {
   description = "Username for sshing into instances"
 }
 
+variable "setup_k8s" {
+  type        = bool
+  default     = true
+  description = "Flag that determines if k8s setup script will be run on the nodes"
+}
+
 variable "install_docker_version" {
   type        = string
   default     = "20.10"
@@ -92,10 +104,16 @@ variable "create_rancher_security_group" {
   description = "Boolean flag defining if the included rancher server-specific security group should be created"
 }
 
+variable "create_registered_cluster_security_group" {
+  type        = bool
+  default     = false
+  description = "Boolean flag defining if the included security group for registered cluster setups should be created"
+}
+
 variable "extra_security_groups" {
   default     = []
   type        = list(string)
-  description = "List of Names for additional security groups to attach to rke1 server instances"
+  description = "List of Names for additional security groups to attach to instances"
 }
 
 variable "aws_azs" {

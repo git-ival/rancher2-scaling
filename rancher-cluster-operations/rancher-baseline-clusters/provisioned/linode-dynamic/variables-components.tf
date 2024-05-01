@@ -13,6 +13,11 @@ variable "num_secrets" {
   default = 100
 }
 
+variable "num_tokens" {
+  type    = number
+  default = 100
+}
+
 variable "num_users" {
   type    = number
   default = 300

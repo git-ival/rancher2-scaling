@@ -13,10 +13,18 @@ data "aws_route53_zone" "linode" {
 }
 
 data "local_file" "kube_config" {
+  count    = local.install_common ? 1 : 0
   filename = local.kube_config
   depends_on = [
     null_resource.rke
   ]
+}
+
+data "rancher2_cluster" "local" {
+  count      = local.install_common ? 1 : 0
+  provider   = rancher2.admin
+  name       = "local"
+  depends_on = [module.install_common]
 }
 
 data "rancher2_setting" "this" {

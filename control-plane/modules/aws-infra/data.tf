@@ -23,7 +23,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/*/ubuntu-*-20.04-*"]
+    values = ["${var.ami_name}"]
   }
 
   filter {
@@ -63,21 +63,27 @@ data "cloudinit_config" "server" {
   #   merge_type   = "list(append)+dict(recurse_array)+str()"
   # }
 
-  part {
-    filename     = "02_k8s-setup.sh"
-    content_type = "text/x-shellscript"
-    content      = file("${path.module}/files/k8s-setup.sh")
-    merge_type   = "list(append)+dict(recurse_array)+str()"
+  dynamic "part" {
+    for_each = var.setup_k8s ? [1] : []
+    content {
+      filename     = "02_k8s-setup.sh"
+      content_type = "text/x-shellscript"
+      content      = file("${path.module}/files/k8s-setup.sh")
+      merge_type   = "list(append)+dict(recurse_array)+str()"
+    }
   }
 
-  part {
-    filename     = "03_docker-install.sh"
-    content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/files/docker-install.sh", {
-      install_docker_version = local.install_docker_version,
-      }
-    )
-    merge_type = "list(append)+dict(recurse_array)+str()"
+  dynamic "part" {
+    for_each = length(local.install_docker_version) > 0 ? [1] : []
+    content {
+      filename     = "03_docker-install.sh"
+      content_type = "text/x-shellscript"
+      content = templatefile("${path.module}/files/docker-install.sh", {
+        install_docker_version = local.install_docker_version,
+        }
+      )
+      merge_type = "list(append)+dict(recurse_array)+str()"
+    }
   }
   dynamic "part" {
     for_each = var.user_data_parts

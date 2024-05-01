@@ -1,6 +1,8 @@
 module "node_template" {
-  for_each = local.v1_configs
-  source   = "../../../rancher-node-template"
+  for_each = {
+    for pool in local.v1_pools : "${pool.name}" => pool
+  }
+  source = "../../../rancher-node-template"
   providers = {
     rancher2 = rancher2
   }
@@ -10,6 +12,7 @@ module "node_template" {
   cloud_cred_id          = module.cloud_credential.id
   install_docker_version = var.install_docker_version
   cloud_provider         = "aws"
+  labels                 = each.value.labels
   node_config = {
     ami                  = data.aws_ami.ubuntu.id
     ssh_user             = "ubuntu"
@@ -22,7 +25,7 @@ module "node_template" {
     root_size            = var.volume_size
     volume_type          = var.volume_type
     iam_instance_profile = var.iam_instance_profile
-    tags                 = "RancherScaling,${local.rancher_subdomain},Owner,${local.rancher_subdomain}"
+    tags                 = "RancherScaling,${local.rancher_subdomain},Owner,${local.rancher_subdomain},DoNotDelete,true"
   }
   engine_fields = var.node_template_engine_fields
 }
@@ -34,12 +37,22 @@ resource "rancher2_node_pool" "cluster_v1_np" {
   cluster_id                  = module.cluster_v1[each.value.config_key].id
   name                        = each.value.name
   hostname_prefix             = each.value.hostname_prefix
-  node_template_id            = module.node_template[each.value.config_key].id
+  node_template_id            = module.node_template[each.value.name].id
   quantity                    = try(tonumber(each.value["quantity"]), false)
   control_plane               = try(tobool(each.value["control-plane"]), false)
   etcd                        = try(tobool(each.value["etcd"]), false)
   worker                      = try(tobool(each.value["worker"]), false)
   delete_not_ready_after_secs = var.auto_replace_timeout
+  dynamic "node_taints" {
+    for_each = each.value.taints
+    iterator = taint
+    content {
+      key        = try(taint.value.key, "")
+      value      = try(taint.value.value, "")
+      effect     = try(taint.value.effect, "")
+      time_added = try(taint.value.time_added, "")
+    }
+  }
 }
 
 module "cluster_v1" {
@@ -50,7 +63,7 @@ module "cluster_v1" {
   }
 
   name                                                       = each.value.name
-  description                                                = "TF linode nodedriver cluster ${each.value.name}"
+  description                                                = "TF AWS nodedriver cluster ${each.value.name}"
   k8s_distribution                                           = each.value.k8s_distribution
   k8s_version                                                = each.value.k8s_version
   network_config                                             = local.network_config

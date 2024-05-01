@@ -2,6 +2,10 @@ output "external_lb_dns_name" {
   value = local.create_external_nlb > 0 ? aws_lb.lb.0.dns_name : null
 }
 
+output "nodes_tags" {
+  value = data.aws_instances.nodes.instance_tags
+}
+
 output "nodes_ids" {
   value = data.aws_instances.nodes.ids
 }

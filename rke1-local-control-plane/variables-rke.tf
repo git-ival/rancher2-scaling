@@ -28,6 +28,20 @@ variable "system_images" {
   description = "A map specifying override values matching the keys at https://github.com/rancher/kontainer-driver-metadata"
 }
 
+variable "local_cluster_auth_endpoint" {
+  type = object({
+    enabled  = bool
+    fqdn     = string
+    ca_certs = string
+  })
+  default = {
+    enabled  = true
+    fqdn     = null
+    ca_certs = null
+  }
+  description = "Enabling the local cluster authorized endpoint allows direct communication with the cluster, bypassing the Rancher API proxy"
+}
+
 variable "psa_config" {
   type        = string
   default     = ""

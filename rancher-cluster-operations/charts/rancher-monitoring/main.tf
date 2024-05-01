@@ -71,6 +71,7 @@ resource "rancher2_app_v2" "rancher_monitoring" {
   count = var.use_v2 ? 1 : 0
 
   cluster_id    = var.cluster_id
+  project_id    = var.project_id
   name          = "rancher-monitoring"
   namespace     = "cattle-monitoring-system"
   repo_name     = "rancher-charts-custom"

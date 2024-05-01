@@ -3,11 +3,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 4.63.0, <= 5.0.0"
+      version = ">= 4.63.0, <= 6.0.0"
     }
     rancher2 = {
       source  = "rancher/rancher2"
-      version = ">= 2.0.0, <= 4.0.0"
+      version = ">= 2.0.0, <= 5.0.0"
     }
     random = {
       source  = "hashicorp/random"

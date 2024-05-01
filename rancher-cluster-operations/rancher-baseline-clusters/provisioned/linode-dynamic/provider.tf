@@ -3,7 +3,11 @@ terraform {
   required_providers {
     rancher2 = {
       source  = "rancher/rancher2"
-      version = ">= 2.0.0, <= 4.0.0"
+      version = ">= 2.0.0, <= 5.0.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.4.3, <= 4.0.0"
     }
   }
   backend "local" {

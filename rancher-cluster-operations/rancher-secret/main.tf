@@ -22,6 +22,12 @@ resource "rancher2_secret" "this" {
   name         = var.name
   namespace_id = var.namespace
   data         = local.secret_data
+  lifecycle {
+    ignore_changes = [
+      namespace_id,
+      project_id
+    ]
+  }
 }
 
 resource "rancher2_secret_v2" "this" {
@@ -35,6 +41,12 @@ resource "rancher2_secret_v2" "this" {
   name        = var.name
   namespace   = var.namespace
   data        = var.data
+
+  lifecycle {
+    ignore_changes = [
+      namespace
+    ]
+  }
 }
 
 data "rancher2_secret" "this" {

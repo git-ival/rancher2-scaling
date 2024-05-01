@@ -14,6 +14,12 @@ variable "k8s_version" {
   description = "Version of k8s to use for downstream cluster (RKE1 version string)"
 }
 
+variable "is_custom_cluster" {
+  type        = bool
+  default     = false
+  description = "Flag that defines if cluster is a custom cluster. Ensures no `<distro>_config` block is created if true"
+}
+
 variable "name" {
   type        = string
   default     = "load-testing"
@@ -81,4 +87,18 @@ variable "fleet_agent_deployment_customization" {
   }))
   default     = null
   description = "Optional customization for fleet agent. For Rancher v2.7.5 and above"
+}
+
+variable "cluster_auth_endpoint" {
+  type = object({
+    enabled  = bool
+    fqdn     = string
+    ca_certs = string
+  })
+  default = {
+    enabled  = true
+    fqdn     = null
+    ca_certs = null
+  }
+  description = "Enabling the local cluster authorized endpoint allows direct communication with the cluster, bypassing the Rancher API proxy"
 }

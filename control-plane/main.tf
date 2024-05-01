@@ -63,7 +63,7 @@ module "k3s" {
   name                        = local.name
   user                        = data.aws_caller_identity.current.user_id
   db_user                     = var.db_username
-  db_pass                     = module.db[0].db_instance_password
+  db_pass                     = data.aws_secretsmanager_secret_version.db_instance_password[0].secret_string
   db_port                     = var.db_port
   db_name                     = var.db_name
   db_engine                   = var.db_engine
@@ -187,6 +187,7 @@ module "install_common" {
   }
 
   kube_config_path               = module.generate_kube_config.kubeconfig_path
+  helm_rancher_repo              = "https://releases.rancher.com/server-charts/${var.rancher_chart}"
   helm_rancher_chart_values_path = length(var.rancher_values_yaml) > 0 ? var.rancher_values_yaml : null
 
   subdomain           = local.name

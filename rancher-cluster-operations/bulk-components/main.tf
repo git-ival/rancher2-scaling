@@ -2,7 +2,8 @@ terraform {
   required_version = ">= 0.14"
   required_providers {
     rancher2 = {
-      source = "rancher/rancher2"
+      source  = "rancher/rancher2"
+      version = ">= 2.0.0, <= 5.0.0"
     }
     local = {
       source = "hashicorp/local"
@@ -12,6 +13,12 @@ terraform {
     }
   }
 }
+
+# provider "rancher2" {
+#   api_url   = var.rancher_api_url
+#   token_key = var.rancher_token_key
+# }
+
 locals {
   name_prefix                               = length(var.name_prefix) > 0 ? var.name_prefix : "${terraform.workspace}-bulk"
   secret_name_prefix                        = "${local.name_prefix}-secret"
@@ -104,6 +111,12 @@ resource "rancher2_token" "this" {
   description = "Bulk Token ${count.index}"
   renew       = true
   ttl         = 0
+
+  lifecycle {
+    ignore_changes = [
+      cluster_id
+    ]
+  }
 }
 
 ### Bulk create secrets
@@ -166,6 +179,12 @@ resource "rancher2_project" "this" {
   name             = "${local.project_name_prefix}-${count.index}"
   cluster_id       = data.rancher2_cluster.this.id
   wait_for_cluster = true
+
+  lifecycle {
+    ignore_changes = [
+      cluster_id
+    ]
+  }
 }
 
 ### Bulk create namespaces in the pre-created project, unused elsewhere
@@ -290,4 +309,10 @@ resource "rancher2_project_role_template_binding" "this" {
   project_id       = rancher2_project.user_roles[0].id
   role_template_id = rancher2_role_template.project[0].id
   user_id          = each.value.id
+  lifecycle {
+    ignore_changes = [
+      project_id,
+      user_id
+    ]
+  }
 }

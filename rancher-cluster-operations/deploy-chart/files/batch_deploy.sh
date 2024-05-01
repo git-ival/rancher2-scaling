@@ -75,6 +75,7 @@ function batch_scale() {
         export KUBECONFIG="${RANCHER_KUBE_CONFIG}"
         get_heap_logs "$(((TARGET_NUM_DEPLOYMENTS + 1) / 2))"    # rounded up
         get_profile_logs "$(((TARGET_NUM_DEPLOYMENTS + 1) / 2))" # rounded up
+        kubectl -n cattle-system logs -l status.phase=Running -l app=rancher -c rancher --timestamps --tail=99999999 >"rancher_logs-$(((TARGET_NUM_DOWNSTREAMS + 1) / 2))_clusters.txt"
       fi
     fi
     counter=$((counter + 1))

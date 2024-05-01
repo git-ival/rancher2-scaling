@@ -51,21 +51,21 @@ module "aws_infra_rke2" {
   rke2_channel                                     = var.rke2_channel
   rke2_config                                      = var.rke2_config
   pre_userdata                                     = "apt update && apt upgrade"
-  post_userdata                                    = <<-EOT
-    cat <<-EOF > /var/lib/rancher/rke2/server/manifests/rke2-ingress-nginx.yaml
-    apiVersion: helm.cattle.io/v1
-    kind: HelmChartConfig
-    metadata:
-      name: rke2-ingress-nginx
-      namespace: kube-system
-    spec:
-      valuesContent: |-
-        controller:
-          kind: DaemonSet
-          daemonset:
-            useHostPort: true
-    EOF
-  EOT
+  # post_userdata                                    = <<-EOT
+  #   cat <<-EOF > /var/lib/rancher/rke2/server/manifests/rke2-ingress-nginx.yaml
+  #   apiVersion: helm.cattle.io/v1
+  #   kind: HelmChartConfig
+  #   metadata:
+  #     name: rke2-ingress-nginx
+  #     namespace: kube-system
+  #   spec:
+  #     valuesContent: |-
+  #       controller:
+  #         kind: DaemonSet
+  #         daemonset:
+  #           useHostPort: true
+  #   EOF
+  # EOT
 }
 
 ## Provision Auto Scaling Group of agent to auto-join cluster with taints and labels for monitoring only

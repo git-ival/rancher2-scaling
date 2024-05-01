@@ -13,6 +13,11 @@ resource "rancher2_cluster" "this" {
   labels                                                     = try(var.labels, null)
   annotations                                                = try(var.annotations, null)
   default_pod_security_admission_configuration_template_name = try(var.default_pod_security_admission_configuration_template_name, null)
+  cluster_auth_endpoint {
+    enabled  = try(var.cluster_auth_endpoint.enabled, null)
+    fqdn     = try(var.cluster_auth_endpoint.fqdn, null)
+    ca_certs = try(var.cluster_auth_endpoint.ca_certs, null)
+  }
   dynamic "fleet_agent_deployment_customization" {
     for_each = var.fleet_agent_deployment_customization != null ? var.fleet_agent_deployment_customization : []
     iterator = customization
@@ -52,7 +57,7 @@ resource "rancher2_cluster" "this" {
 
   # If provisioning OR importing RKE1 cluster(s) use the following
   dynamic "rke_config" {
-    for_each = var.k8s_distribution == "rke1" ? [1] : []
+    for_each = var.k8s_distribution == "rke1" && !var.is_custom_cluster ? [1] : []
 
     content {
       kubernetes_version    = var.k8s_version
@@ -196,7 +201,7 @@ resource "rancher2_cluster" "this" {
   }
   # If importing RKE2 cluster(s) use the following
   dynamic "rke2_config" {
-    for_each = var.k8s_distribution == "rke2" ? [1] : []
+    for_each = var.k8s_distribution == "rke2" && !var.is_custom_cluster ? [1] : []
     content {
       version = var.k8s_version
       dynamic "upgrade_strategy" {
@@ -214,7 +219,7 @@ resource "rancher2_cluster" "this" {
 
   # If importing K3s cluster(s) use the following
   dynamic "k3s_config" {
-    for_each = var.k8s_distribution == "k3s" ? [1] : []
+    for_each = var.k8s_distribution == "k3s" && !var.is_custom_cluster ? [1] : []
     content {
       version = var.k8s_version
       dynamic "upgrade_strategy" {

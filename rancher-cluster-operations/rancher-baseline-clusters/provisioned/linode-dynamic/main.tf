@@ -124,43 +124,6 @@ resource "rancher2_project" "this" {
   ]
 }
 
-# resource "rancher2_catalog_v2" "rancher_charts_custom" {
-#   for_each = local.clusters_info
-#   provider = rancher2
-
-#   cluster_id = each.value.id
-#   name       = "rancher-charts-custom"
-#   git_repo   = "https://git.rancher.io/charts"
-#   git_branch = "dev-v2.7"
-
-#   provisioner "local-exec" {
-#     command = <<-EOT
-#     sleep 10
-#     EOT
-#   }
-
-#   depends_on = [
-#     rancher2_project.this
-#   ]
-# }
-
-# resource "rancher2_app_v2" "rancher_monitoring" {
-#   for_each = local.clusters_info
-#   provider = rancher2
-
-#   cluster_id    = each.value.id
-#   name          = "rancher-monitoring"
-#   namespace     = "cattle-monitoring-system"
-#   repo_name     = "rancher-charts-custom"
-#   chart_name    = "rancher-monitoring"
-#   chart_version = "102.0.1+up40.1.2"
-#   values        = file("/home/ivln/workspace/work/RancherVCS/rancher2-scaling/rancher-cluster-operations/charts/rancher-monitoring/files/rancher_monitoring_chart_values.yaml")
-
-#   depends_on = [
-#     rancher2_catalog_v2.rancher_charts_custom
-#   ]
-# }
-
 module "rancher_monitoring" {
   for_each = var.install_monitoring == true ? local.clusters_info : {}
   source   = "../../../charts/rancher-monitoring"
@@ -168,9 +131,8 @@ module "rancher_monitoring" {
     rancher2 = rancher2
   }
 
-  use_v2        = true
-  rancher_url   = var.rancher_api_url
-  rancher_token = var.rancher_token_key
+  use_v2 = true
+  # charts_repo   = "https://github.com/rancher/charts"
   charts_branch = var.rancher_charts_branch
   chart_version = var.monitoring_version
   cluster_id    = each.value.id
@@ -188,8 +150,6 @@ module "bulk_components" {
   providers = {
     rancher2 = rancher2
   }
-  rancher_api_url   = var.rancher_api_url
-  rancher_token_key = var.rancher_token_key
   output_local_file = false
 
   cluster_name         = each.value.name
@@ -198,6 +158,7 @@ module "bulk_components" {
   num_projects         = var.num_projects
   num_namespaces       = var.num_namespaces
   num_secrets          = var.num_secrets
+  num_tokens           = var.num_tokens
   num_users            = var.num_users
   name_prefix          = "baseline-${each.value.id}"
   user_project_binding = true
@@ -209,4 +170,14 @@ module "bulk_components" {
     rancher2_project.this,
     module.rancher_monitoring
   ]
+}
+
+module "folding" {
+  for_each = var.install_folding == true ? local.clusters_info : {}
+  source   = "../../../charts/helm-foldingathome"
+  providers = {
+    rancher2 = rancher2
+  }
+  cluster_id = each.value.id
+  depends_on = [module.bulk_components]
 }

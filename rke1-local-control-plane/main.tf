@@ -3,6 +3,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
+      version = "5.9.0"
     }
     local = {
       source = "hashicorp/local"
@@ -15,9 +16,11 @@ terraform {
     }
     helm = {
       source = "hashicorp/helm"
+      version = "2.10.1"
     }
     linode = {
       source = "linode/linode"
+      version = "2.5.2"
     }
   }
   backend "local" {
@@ -49,6 +52,7 @@ locals {
   rke_file_path            = "${path.module}/files/clusters/${terraform.workspace}"
   cluster_yml              = "${local.rke_file_path}/${terraform.workspace}_cluster.yml"
   kube_config              = "${local.rke_file_path}/kube_config_${terraform.workspace}_cluster.yml"
+  rancher_kube_config      = "${local.rke_file_path}/local_kube_config_${terraform.workspace}"
   rancher_url              = local.install_common ? try(module.install_common[0].rancher_url, "") : ""
   rancher_token            = local.install_common ? try(module.install_common[0].rancher_token, "") : ""
   nodes_info = var.infra_provider == "aws" ? [for i in range(0, local.server_node_count) : {
@@ -129,20 +133,21 @@ resource "aws_route53_record" "linode" {
 resource "local_file" "cluster_yml" {
   filename = local.cluster_yml
   content = templatefile("${path.module}/files/values/rke_cluster_yaml.tfpl", {
-    addresses                 = local.server_addresses,
-    private_addresses         = local.server_private_addresses,
-    dedicated_monitoring      = local.install_monitoring,
-    monitor_address           = local.monitor_address,
-    monitor_private_address   = local.monitor_private_address,
-    psa_config                = var.psa_config,
-    psa_file                  = length(var.psa_file) > 0 ? file(var.psa_file) : "",
-    enable_secrets_encryption = var.enable_secrets_encryption,
-    enable_audit_log          = var.enable_audit_log,
-    ssh_key_path              = var.ssh_key_path,
-    kubernetes_version        = var.install_k8s_version
-    enable_cri_dockerd        = var.enable_cri_dockerd
-    user                      = var.user
-    system_images             = var.system_images
+    addresses                   = local.server_addresses,
+    private_addresses           = local.server_private_addresses,
+    dedicated_monitoring        = local.install_monitoring,
+    monitor_address             = local.monitor_address,
+    monitor_private_address     = local.monitor_private_address,
+    local_cluster_auth_endpoint = var.local_cluster_auth_endpoint,
+    psa_config                  = var.psa_config,
+    psa_file                    = length(var.psa_file) > 0 ? file(var.psa_file) : "",
+    enable_secrets_encryption   = var.enable_secrets_encryption,
+    enable_audit_log            = var.enable_audit_log,
+    ssh_key_path                = var.ssh_key_path,
+    kubernetes_version          = var.install_k8s_version
+    enable_cri_dockerd          = var.enable_cri_dockerd
+    user                        = var.user
+    system_images               = var.system_images
   })
 
   depends_on = [
@@ -152,6 +157,7 @@ resource "local_file" "cluster_yml" {
 }
 
 resource "null_resource" "rke" {
+  count = local.install_common || local.install_monitoring ? 1 : 0
   triggers = {
     "rke_file_path"  = "${local.rke_file_path}/"
     "cluster_yml"    = local.cluster_yml
@@ -184,7 +190,7 @@ module "install_common" {
     rancher2 = rancher2.bootstrap
   }
 
-  kube_config_path = data.local_file.kube_config.filename
+  kube_config_path = data.local_file.kube_config[0].filename
 
   subdomain           = local.name
   domain              = local.domain
@@ -193,7 +199,7 @@ module "install_common" {
   rancher_version     = var.rancher_version
   certmanager_version = var.certmanager_version
 
-  helm_rancher_repo              = "https://releases.rancher.com/server-charts/${var.rancher_chart}"
+  helm_rancher_repo              = "${var.helm_rancher_repo}"
   helm_rancher_chart_values_path = "${path.module}/files/values/rancher_chart_values.tftpl"
   letsencrypt_email              = var.letsencrypt_email
   rancher_image                  = var.rancher_image
@@ -209,7 +215,7 @@ module "install_common" {
 
   depends_on = [
     null_resource.rke,
-    data.local_file.kube_config
+    data.local_file.kube_config[0]
   ]
 }
 
@@ -223,12 +229,42 @@ resource "null_resource" "set_loglevel" {
     kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n cattle-system get pods -l app=rancher --no-headers -o custom-columns=name:.metadata.name | while read rancherpod; do kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n cattle-system exec $rancherpod -c rancher -- loglevel --set ${var.rancher_loglevel}; done
     EOT
     environment = {
-      KUBECONFIG = base64encode(data.local_file.kube_config.content)
+      KUBECONFIG = base64encode(data.local_file.kube_config[0].content)
     }
   }
 
   depends_on = [
     module.install_common
+  ]
+}
+
+module "rancher_monitoring" {
+  count  = local.install_monitoring ? 1 : 0
+  source = "../rancher-cluster-operations/charts/rancher-monitoring"
+  providers = {
+    rancher2 = rancher2.admin
+  }
+
+  use_v2        = true
+  charts_repo   = var.rancher_charts_repo
+  charts_branch = var.rancher_charts_branch
+  chart_version = var.monitoring_version
+  cluster_id    = "local"
+  strict_taints = true
+
+  depends_on = [
+    null_resource.set_loglevel,
+    module.install_common
+  ]
+}
+
+resource "local_file" "rancher_kubeconfig" {
+  count    = local.install_common ? 1 : 0
+  filename = local.rancher_kube_config
+  content  = data.rancher2_cluster.local[0].kube_config
+
+  depends_on = [
+    module.install_common,
   ]
 }
 
@@ -246,40 +282,40 @@ resource "rancher2_setting" "this" {
   ]
 }
 
-resource "rancher2_catalog_v2" "rancher_charts_custom" {
-  count    = local.install_monitoring ? 1 : 0
-  provider = rancher2.admin
+# resource "rancher2_catalog_v2" "rancher_charts_custom" {
+#   count    = local.install_monitoring ? 1 : 0
+#   provider = rancher2.admin
 
-  cluster_id = "local"
-  name       = "rancher-charts-custom"
-  git_repo   = var.rancher_charts_repo
-  git_branch = var.rancher_charts_branch
+#   cluster_id = "local"
+#   name       = "rancher-charts-custom"
+#   git_repo   = var.rancher_charts_repo
+#   git_branch = var.rancher_charts_branch
 
-  provisioner "local-exec" {
-    command = <<-EOT
-    sleep 10
-    EOT
-  }
+#   provisioner "local-exec" {
+#     command = <<-EOT
+#     sleep 10
+#     EOT
+#   }
 
-  depends_on = [
-    null_resource.set_loglevel,
-    module.install_common
-  ]
-}
+#   depends_on = [
+#     null_resource.set_loglevel,
+#     module.install_common
+#   ]
+# }
 
-resource "rancher2_app_v2" "rancher_monitoring" {
-  count    = local.install_monitoring ? 1 : 0
-  provider = rancher2.admin
+# resource "rancher2_app_v2" "rancher_monitoring" {
+#   count    = local.install_monitoring ? 1 : 0
+#   provider = rancher2.admin
 
-  cluster_id    = "local"
-  name          = "rancher-monitoring"
-  namespace     = "cattle-monitoring-system"
-  repo_name     = "rancher-charts-custom"
-  chart_name    = "rancher-monitoring"
-  chart_version = var.monitoring_version
-  values        = file(var.monitoring_chart_values_path)
+#   cluster_id    = "local"
+#   name          = "rancher-monitoring"
+#   namespace     = "cattle-monitoring-system"
+#   repo_name     = "rancher-charts-custom"
+#   chart_name    = "rancher-monitoring"
+#   chart_version = var.monitoring_version
+#   values        = file(var.monitoring_chart_values_path)
 
-  depends_on = [
-    rancher2_catalog_v2.rancher_charts_custom
-  ]
-}
+#   depends_on = [
+#     rancher2_catalog_v2.rancher_charts_custom
+#   ]
+# }

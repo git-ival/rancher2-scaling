@@ -1,15 +1,3 @@
-variable "rancher_url" {
-  default     = null
-  type        = string
-  description = "The Rancher Server's URL"
-}
-
-variable "rancher_token" {
-  default     = null
-  type        = string
-  description = "Rancher2 API token for authentication"
-}
-
 variable "use_v2" {
   default     = true
   type        = bool
