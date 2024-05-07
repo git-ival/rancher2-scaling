@@ -103,8 +103,8 @@ variable "insecure_flag" {
 }
 
 variable "install_folding" {
-  type = bool
-  default = false
+  type        = bool
+  default     = false
   description = "Flag used to determine if helm-foldingathome should be installed"
 }
 

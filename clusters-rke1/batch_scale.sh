@@ -10,7 +10,7 @@ echo "BATCH_NUM_NODES: ${BATCH_NUM_NODES} TARGET_NUM_DOWNSTREAMS: ${TARGET_NUM_D
 export KUBECONFIG="${KUBE_CONFIG}"
 
 function get_heap_logs() {
-    for pod in $(kubectl -n cattle-system get pods --no-headers -l status.phase=Running -l app=rancher | grep Running | cut -d ' ' -f1); do
+    for pod in $(kubectl -n cattle-system get pods --no-headers --field-selector status.phase=Running -l app=rancher | grep Running | cut -d ' ' -f1); do
         echo "getting mem profile for \"${pod}\""
         kubectl -n cattle-system exec "${pod}" -- curl -s http://localhost:6060/debug/pprof/heap -o mem-profile.log
         kubectl -n cattle-system cp "${pod}:mem-profile.log" "${pod}-${1}_clusters-heap.log"
@@ -19,7 +19,7 @@ function get_heap_logs() {
 }
 
 function get_profile_logs() {
-    for pod in $(kubectl -n cattle-system get pods --no-headers -l status.phase=Running -l app=rancher | grep Running | cut -d ' ' -f1); do
+    for pod in $(kubectl -n cattle-system get pods --no-headers --field-selector status.phase=Running -l app=rancher | grep Running | cut -d ' ' -f1); do
         echo "getting cpu profile for \"${pod}\""
         kubectl -n cattle-system exec "${pod}" -- curl -s http://localhost:6060/debug/pprof/profile -o cpu-profile.log
         kubectl -n cattle-system cp "${pod}:cpu-profile.log" "${pod}-${1}_clusters-profile.log"
@@ -56,6 +56,7 @@ function batch_scale() {
             if [[ "${counter}" -eq $HALF_COMPLETE ]]; then
                 get_heap_logs "$(((TARGET_NUM_DOWNSTREAMS + 1)/2))" # rounded up
                 get_profile_logs "$(((TARGET_NUM_DOWNSTREAMS + 1)/2))" # rounded up
+                kubectl -n cattle-system logs -l app=rancher -c rancher --timestamps --tail=99999999 > "rancher_logs-$(((TARGET_NUM_DOWNSTREAMS + 1)/2))_clusters.txt"
             fi
         fi
         counter=$((counter + 1))
@@ -91,4 +92,4 @@ echo "leader: $(get_leader_node)"
 echo "monitor: $(get_monitor_node)"
 
 # Get essentially as many rancher logs as will likely exist
-kubectl -n cattle-system logs -l status.phase=Running -l app=rancher -c rancher --timestamps --tail=99999999 > "rancher_logs-${clusters_reached}_clusters.txt"
+kubectl -n cattle-system logs --field-selector status.phase=Running -l app=rancher -c rancher --timestamps --tail=99999999 > "rancher_logs-${clusters_reached}_clusters.txt"

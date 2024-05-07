@@ -68,7 +68,8 @@ module "cluster_v1" {
   fleet_agent_deployment_customization                       = local.v1_fleet_customization
 
   depends_on = [
-    module.node_template
+    module.node_template,
+    rancher2_pod_security_admission_configuration_template.rancher_restricted_folding
   ]
 }
 

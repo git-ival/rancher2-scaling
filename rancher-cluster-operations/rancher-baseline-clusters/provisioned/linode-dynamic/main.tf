@@ -19,13 +19,14 @@ locals {
     }
   } : null
   ### Cluster and node pool configuration
-  cluster_configs = [for i, config in var.cluster_configs : {
-    name             = length(config.name) > 0 ? config.name : substr("${config.k8s_distribution}-${local.name_suffix}${i}", 0, local.name_max_length)
-    k8s_distribution = config.k8s_distribution
-    k8s_version      = config.k8s_version
-    psa_config       = config.psa_config
-    roles_per_pool   = config.roles_per_pool
-  }]
+  cluster_configs = flatten([for i, config in var.cluster_configs : [
+    for c in range(config.count) : {
+      name             = length(config.name) > 0 ? "${config.name}-${c}" : substr("${config.k8s_distribution}-${local.name_suffix}${i}-${c}", 0, local.name_max_length)
+      k8s_distribution = config.k8s_distribution
+      k8s_version      = config.k8s_version
+      psa_config       = config.psa_config
+      roles_per_pool   = config.roles_per_pool
+  }]])
   v1_configs = {
     for i, config in local.cluster_configs :
     i => config if config.k8s_distribution == "rke1"
@@ -111,6 +112,31 @@ module "cloud_credential" {
   cloud_provider = "linode"
   credential_config = {
     token = var.linode_token
+  }
+}
+
+data "rancher2_pod_security_admission_configuration_template" "rancher_restricted" {
+  count = var.install_folding == true ? 1 : 0
+  name  = "rancher-restricted"
+}
+
+resource "rancher2_pod_security_admission_configuration_template" "rancher_restricted_folding" {
+  count       = var.install_folding == true ? 1 : 0
+  name        = "rancher-restricted-folding"
+  description = "Terraform PodSecurityAdmissionConfigurationTemplate with added exemption for the 'folding' namespace"
+  defaults {
+    audit           = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].defaults[0].audit
+    audit_version   = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].defaults[0].audit_version
+    enforce         = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].defaults[0].enforce
+    enforce_version = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].defaults[0].enforce_version
+    warn            = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].defaults[0].warn
+    warn_version    = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].defaults[0].warn_version
+  }
+
+  exemptions {
+    usernames       = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].exemptions[0].usernames
+    runtime_classes = data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].exemptions[0].runtime_classes
+    namespaces      = concat(data.rancher2_pod_security_admission_configuration_template.rancher_restricted[0].exemptions[0].namespaces, ["folding"])
   }
 }
 

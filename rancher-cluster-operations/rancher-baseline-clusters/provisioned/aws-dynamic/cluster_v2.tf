@@ -94,7 +94,8 @@ resource "rancher2_cluster_v2" "cluster_v2" {
     create = "15m"
   }
   depends_on = [
-    module.cloud_credential
+    module.cloud_credential,
+    rancher2_pod_security_admission_configuration_template.rancher_restricted_folding
   ]
 }
 
