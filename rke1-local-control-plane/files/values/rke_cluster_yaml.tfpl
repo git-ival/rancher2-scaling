@@ -45,6 +45,12 @@ ingress:
 ssh_key_path: ${ssh_key_path}
 ssh_agent_auth: false
 ignore_docker_version: false
+%{ if length(local_cluster_auth_endpoint) > 0 ~}
+local_cluster_auth_endpoint:
+%{ for key, value in system_images ~}
+  ${key}: ${value}
+%{ endfor ~}
+%{ endif ~}
 %{ if length(kubernetes_version) > 0 ~}
 kubernetes_version: ${kubernetes_version}
 %{ endif ~}
